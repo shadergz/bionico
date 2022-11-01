@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.18.1)
+project(hackinarm)
+add_library(hackinarm SHARED JNI_FrontEND.cpp IPA_Handler.cpp IPA_Manager.cpp)
+find_library(log-lib log)
+target_link_libraries(hackinarm ${log-lib})
