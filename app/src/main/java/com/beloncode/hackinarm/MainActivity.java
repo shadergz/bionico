@@ -15,6 +15,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -41,9 +42,18 @@ public class MainActivity extends AppCompatActivity {
                     mainLogger.release("Can't open the file or no file has been selected");
                     return;
                 }
-                String possibleIPA_URI = result.getData().toString();
-                final String toastMessage = String.format("Reading URI: %s", possibleIPA_URI);
+                Uri resolveURI = result.getData().getData();
+                String URIAbsolutePath = "(NONE)";
+
+                try {
+                    URIAbsolutePath = mainIPAHandler.pushIPAFromIPA(resolveURI);
+                } catch (IPAException ipaException) {
+                    mainLogger.release(Log.WARN, ipaException.getMessage());
+                }
+
+                final String toastMessage = String.format("Adding an URI pathname: %s", URIAbsolutePath);
                 Toast.makeText(getApplicationContext(), toastMessage, Toast.LENGTH_LONG).show();
+
             });
 
     public void selectIPAArchive() {
@@ -63,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         mainLogger = new HackLogger(Log.INFO);
-        mainIPAHandler = new IPAHandler();
+        mainIPAHandler = new IPAHandler(getApplicationContext());
 
         hackInitSystem();
         NavigationBarView mainBarView = findViewById(R.id.nav_screen);
@@ -139,6 +149,12 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
         hackDestroy();
         getProviderResult.unregister();
+        try {
+            // Destroying all IO controllable resources
+            mainIPAHandler.deleteAllResources();
+        } catch (IPAException ipaException) {
+            mainLogger.release(Log.ERROR, ipaException.getMessage());
+        }
     }
 
     public native boolean hackInitSystem();

@@ -2,8 +2,8 @@
 #include <android/log.h>
 #include <string>
 
-#include "Runtime_Resources.h"
-#include "ENV_Test.h"
+#include "runtime_resources.h"
+#include "ENV_test.h"
 
 extern "C"
 JNIEXPORT jboolean JNICALL Java_com_beloncode_hackinarm_MainActivity_hackInitSystem
@@ -34,4 +34,16 @@ JNIEXPORT jboolean JNICALL Java_com_beloncode_hackinarm_MainActivity_hackDestroy
     (JNIEnv *env, jobject thiz) {
     HackinARM::Env::checkJavaEnv(env, thiz);
     return true;
+}
+
+extern "C"
+JNIEXPORT jstring JNICALL
+Java_com_beloncode_hackinarm_IPAHandler_hackPushIPAFile(JNIEnv *env, jclass clazz,
+                                                        jobject file_descriptor) {
+    HackinARM::Env::checkJavaEnv(env, file_descriptor);
+    std::shared_ptr<HackinARM::Formats::IPAArchive> IPABackendFormat;
+    IPABackendFormat = std::make_shared<HackinARM::Formats::IPAArchive>(env, clazz, file_descriptor);
+    auto MainIPAHandler = HackinARM::Resources::gMainIPAManager;
+    MainIPAHandler->managerNewIPA(IPABackendFormat);
+    return nullptr;
 }
