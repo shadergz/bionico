@@ -4,7 +4,7 @@
 
 #include <vector>
 
-static constexpr std::string_view gBackEndLogTag = "HackinARM Backend";
+static constexpr std::string_view gBackEndLogTag = "HackinARM backend";
 
 namespace HackinARM::Formats {
     class IPAArchive {

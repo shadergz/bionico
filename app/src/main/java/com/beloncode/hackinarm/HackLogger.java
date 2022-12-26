@@ -4,13 +4,13 @@ import android.util.Log;
 
 public class HackLogger {
     private final int defaultLogMax;
-    private final String loggerTag = "HackinARM Frontend";
+    private final String loggerTag = "HackinARM frontend";
 
     HackLogger(int defaultLog) {
         defaultLogMax = defaultLog;
     }
 
-    void release(@SuppressWarnings("SameParameterValue") String frontEndMessage) {
+    void release(@SuppressWarnings("SameParameterValue") final String frontEndMessage) {
         switch(defaultLogMax) {
             case Log.INFO:
                 Log.d(loggerTag, frontEndMessage);

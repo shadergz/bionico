@@ -88,7 +88,6 @@ public class IPAHandler {
         }
 
         mIPAItemList.add(IPAFile);
-
         return mIPAItemList.size();
     }
 
