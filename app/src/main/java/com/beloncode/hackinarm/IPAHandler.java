@@ -3,6 +3,7 @@ package com.beloncode.hackinarm;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.net.Uri;
+import android.os.ParcelFileDescriptor;
 
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
