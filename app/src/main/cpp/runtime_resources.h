@@ -2,15 +2,15 @@
 
 #include <memory>
 
-#include "IPA.h"
+#include <IPA_modulator.h>
 
 namespace HackinARM::Resources {
-    [[maybe_unused]] std::shared_ptr<Formats::IPAManager> gMainIPAManager;
+    [[maybe_unused]] std::shared_ptr<Formats::IPAManager> g_MainIPAManager;
 
 }
 
 namespace HackinARM::Env {
-    [[maybe_unused]] JNIEnv* mInitializedEnv;
-    [[maybe_unused]] jobject mAtCreateObject;
+    [[maybe_unused]] JNIEnv* m_InitializedEnv;
+    [[maybe_unused]] jobject m_AtCreateObject;
 }
 

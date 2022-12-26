@@ -29,30 +29,30 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationBarView;
 
 public class MainActivity extends AppCompatActivity {
-    final int viewerList = R.drawable.ic_baseline_view_list_24;
-    final int gridList = R.drawable.ic_baseline_grid_view_24;
+    final int f_viewerList = R.drawable.ic_baseline_view_list_24;
+    final int f_gridList = R.drawable.ic_baseline_grid_view_24;
 
-    int inUseListIcon = viewerList;
-    HackLogger mainLogger = null;
-    IPAHandler mainIPAHandler = null;
+    int inUseListIcon = f_viewerList;
+    HackLogger p_mainLogger = null;
+    IPAHandler p_mainIPAHandler = null;
 
     ActivityResultLauncher<Intent> getProviderResult = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(), result -> {
                 if (result.getData() == null || result.getResultCode() != RESULT_OK) {
-                    mainLogger.release("Can't open the file or no file has been " +
+                    p_mainLogger.release("Can't open the file or no file has been " +
                             "selected");
                     return;
                 }
                 Uri resolveURI = result.getData().getData();
-                String URIAbsolutePath = "(NONE)";
+                String URIAbsolutePath = "(Undefined)";
 
                 try {
-                    URIAbsolutePath = mainIPAHandler.pushIPAFromIPA(resolveURI);
+                    URIAbsolutePath = p_mainIPAHandler.pushIPAFromIPA(resolveURI);
                 } catch (IPAException ipaException) {
-                    mainLogger.release(Log.WARN, ipaException.getMessage());
+                    p_mainLogger.release(Log.WARN, ipaException.getMessage());
                 }
 
-                final String toastMessage = String.format("Adding an URI pathname: %s",
+                final String toastMessage = String.format("Adding an IPA package with pathname: %s",
                         URIAbsolutePath);
                 Toast.makeText(getApplicationContext(), toastMessage, Toast.LENGTH_LONG).show();
 
@@ -74,23 +74,23 @@ public class MainActivity extends AppCompatActivity {
         ActivityMainBinding binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        mainLogger = new HackLogger(Log.INFO);
-        mainIPAHandler = new IPAHandler(getApplicationContext());
+        p_mainLogger = new HackLogger(Log.INFO);
+        p_mainIPAHandler = new IPAHandler(getApplicationContext(), p_mainLogger);
 
         hackInitSystem();
         NavigationBarView mainBarView = findViewById(R.id.nav_screen);
         mainBarView.setOnItemSelectedListener(item -> {
             if (item.getItemId() == R.id.view_button) {
-                Drawable listIcon = ResourcesCompat.getDrawable(getResources(), viewerList,
+                Drawable listIcon = ResourcesCompat.getDrawable(getResources(), f_viewerList,
                         getTheme());
-                Drawable gridIcon = ResourcesCompat.getDrawable(getResources(), gridList,
+                Drawable gridIcon = ResourcesCompat.getDrawable(getResources(), f_gridList,
                         getTheme());
-                if (inUseListIcon == viewerList) {
+                if (inUseListIcon == f_viewerList) {
                     item.setIcon(gridIcon);
-                    inUseListIcon = gridList;
+                    inUseListIcon = f_gridList;
                 } else {
                     item.setIcon(listIcon);
-                    inUseListIcon = viewerList;
+                    inUseListIcon = f_viewerList;
                 }
             }
             return true;
@@ -103,7 +103,7 @@ public class MainActivity extends AppCompatActivity {
         RecyclerView.LayoutManager mainContextListLayout = new LinearLayoutManager(mainContext);
         IPAAdapter mainIPAAdapter = new IPAAdapter();
 
-        RecyclerView mainIPAList = findViewById(R.id.ipa_list);
+        final RecyclerView mainIPAList = findViewById(R.id.ipa_list);
         mainIPAList.setLayoutManager(mainContextListLayout);
         mainIPAList.setHasFixedSize(true);
         mainIPAList.setAdapter(mainIPAAdapter);
@@ -156,9 +156,9 @@ public class MainActivity extends AppCompatActivity {
         getProviderResult.unregister();
         try {
             // Destroying all IO controllable resources
-            mainIPAHandler.deleteAllResources();
+            p_mainIPAHandler.deleteAllResources();
         } catch (IPAException ipaException) {
-            mainLogger.release(Log.ERROR, ipaException.getMessage());
+            p_mainLogger.release(Log.ERROR, ipaException.getMessage());
         }
     }
 
