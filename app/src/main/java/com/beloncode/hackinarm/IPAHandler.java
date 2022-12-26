@@ -3,7 +3,6 @@ package com.beloncode.hackinarm;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.net.Uri;
-import android.os.ParcelFileDescriptor;
 
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
@@ -34,20 +33,23 @@ public class IPAHandler {
         final IPAItem localIPAItem = new IPAItem();
 
         final ContentResolver mainResolver = mainActivityContext.getContentResolver();
-        ParcelFileDescriptor parcelFileDescriptor;
         // File descriptor by himself
         final FileDescriptor fileDescriptor;
 
         try {
-            parcelFileDescriptor = mainResolver.openFileDescriptor(IPAFilename, "r");
-            fileDescriptor = parcelFileDescriptor.getFileDescriptor();
+            localIPAItem.mParserFD = mainResolver.openFileDescriptor(IPAFilename, "r");
+
+            ParcelFileDescriptor IPAParser = localIPAItem.mParserFD;
+            fileDescriptor = IPAParser.getFileDescriptor();
+
             if (!fileDescriptor.valid()) {
-                final String fdException = String.format("File Descriptor for %s not valid!", IPAFilename);
+                final String fdException = String.format("File Descriptor for %s not valid!",
+                        IPAFilename);
                 throw new IPAException(fdException);
             }
-            parcelFileDescriptor.close();
         } catch (IOException e) {
-            final String ioErrorCause = String.format("IPAFilename can't be located, because %s", e.getMessage());
+            final String ioErrorCause = String.format("IPAFilename can't be located, because %s",
+                    e.getMessage());
             throw new IPAException(ioErrorCause);
         }
 
