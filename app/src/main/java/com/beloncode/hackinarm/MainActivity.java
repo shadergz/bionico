@@ -39,7 +39,8 @@ public class MainActivity extends AppCompatActivity {
     ActivityResultLauncher<Intent> getProviderResult = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(), result -> {
                 if (result.getData() == null || result.getResultCode() != RESULT_OK) {
-                    mainLogger.release("Can't open the file or no file has been selected");
+                    mainLogger.release("Can't open the file or no file has been " +
+                            "selected");
                     return;
                 }
                 Uri resolveURI = result.getData().getData();
@@ -51,7 +52,8 @@ public class MainActivity extends AppCompatActivity {
                     mainLogger.release(Log.WARN, ipaException.getMessage());
                 }
 
-                final String toastMessage = String.format("Adding an URI pathname: %s", URIAbsolutePath);
+                final String toastMessage = String.format("Adding an URI pathname: %s",
+                        URIAbsolutePath);
                 Toast.makeText(getApplicationContext(), toastMessage, Toast.LENGTH_LONG).show();
 
             });
@@ -79,8 +81,10 @@ public class MainActivity extends AppCompatActivity {
         NavigationBarView mainBarView = findViewById(R.id.nav_screen);
         mainBarView.setOnItemSelectedListener(item -> {
             if (item.getItemId() == R.id.view_button) {
-                Drawable listIcon = ResourcesCompat.getDrawable(getResources(), viewerList, getTheme());
-                Drawable gridIcon = ResourcesCompat.getDrawable(getResources(), gridList, getTheme());
+                Drawable listIcon = ResourcesCompat.getDrawable(getResources(), viewerList,
+                        getTheme());
+                Drawable gridIcon = ResourcesCompat.getDrawable(getResources(), gridList,
+                        getTheme());
                 if (inUseListIcon == viewerList) {
                     item.setIcon(gridIcon);
                     inUseListIcon = gridList;
@@ -136,7 +140,8 @@ public class MainActivity extends AppCompatActivity {
             }
 
         } else {
-            Intent accessPermissionIntent = new Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
+            Intent accessPermissionIntent = new Intent(
+                    Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
             if (!Environment.isExternalStorageEmulated()) {
                 startActivityIfNeeded(accessPermissionIntent, 1);
             }

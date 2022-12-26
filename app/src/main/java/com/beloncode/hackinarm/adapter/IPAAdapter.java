@@ -28,7 +28,8 @@ public class IPAAdapter extends RecyclerView.Adapter<IPAAdapter.IPAHolder> {
     public IPAAdapter.IPAHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         Context mainContext = parent.getContext();
         LayoutInflater mainInflater = LayoutInflater.from(mainContext);
-        View ipaItemInMemory = mainInflater.inflate(R.layout.ipa_software_item, parent, false);
+        View ipaItemInMemory = mainInflater.inflate(R.layout.ipa_software_item, parent,
+                false);
 
         return new IPAHolder(ipaItemInMemory);
     }

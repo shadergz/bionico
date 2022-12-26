@@ -57,7 +57,8 @@ public class IPAHandler {
 
         final int lastReadableLength = mIPAItemList.size();
         final int currentReadableLength = openIPAStream(localIPAItem);
-        assert lastReadableLength != currentReadableLength: "No one readable content added into list";
+        assert lastReadableLength != currentReadableLength: "No one readable content added into "
+            + "list";
 
         // Returning it's filename
         return localIPAItem.mIPAFilename;
@@ -78,7 +79,8 @@ public class IPAHandler {
             // Resenting internal file cursor
             inputStream.reset();
         } catch (IOException ioException) {
-            final String ioExcept = String.format("IO Exception caused by %s", ioException.getMessage());
+            final String ioExcept = String.format("IO Exception caused by %s",
+                    ioException.getMessage());
             throw new IPAException(ioExcept);
         }
         // Now that the FileDescriptor is ready and it's valid, we can use it into Backend
@@ -98,11 +100,16 @@ public class IPAHandler {
             for (IPAItem readableContext : mIPAItemList) {
                 // Feeding all resources used to handler an IPA Item
                 final FileInputStream fileInputStream = readableContext.mFileInputStream;
+                ParcelFileDescriptor contextParser = readableContext.mParserFD;
+
+                contextParser.close();
+
                 fileInputStream.close();
                 mIPAItemList.remove(readableContext);
             }
         } catch (IOException ioException) {
-            final String caughtProblem = String.format("IO Exception generated because %s", ioException.getMessage());
+            final String caughtProblem = String.format("IO Exception generated because %s",
+                    ioException.getMessage());
             throw new IPAException(caughtProblem);
         }
     }
