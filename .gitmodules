@@ -1,0 +1,3 @@
+[submodule "app/src/main/cpp/dependencies/fmt"]
+	path = app/src/main/cpp/dependencies/fmt
+	url = https://github.com/fmtlib/fmt.git

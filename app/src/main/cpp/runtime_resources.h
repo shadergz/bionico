@@ -1,16 +1,23 @@
 #pragma once
 
+#include <jni.h>
+
 #include <memory>
+#include <common/references.h>
 
-#include <IPA_modulator.h>
-
-namespace HackinARM::Resources {
-    [[maybe_unused]] std::shared_ptr<Formats::IPAManager> g_MainIPAManager;
-
+namespace hackback::ipa {
+    class IpaManager;
+    class IpaManager;
 }
 
-namespace HackinARM::Env {
-    [[maybe_unused]] JNIEnv* m_InitializedEnv;
-    [[maybe_unused]] jobject m_AtCreateObject;
-}
+namespace hackback {
+    class SlayerLogger;
 
+    using namespace common;
+
+    extern std::shared_ptr<ipa::IpaManager> g_main_ipa_mgr;
+    extern std::shared_ptr<SlayerLogger> g_logger;
+    extern RawPointer<JNIEnv*> g_env;
+    extern RawPointer<jobject> g_main_class;
+
+}

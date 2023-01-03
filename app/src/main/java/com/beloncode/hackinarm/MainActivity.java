@@ -109,10 +109,6 @@ public class MainActivity extends AppCompatActivity {
         mainIPAList.setAdapter(mainIPAAdapter);
     }
 
-    static {
-        System.loadLibrary("hackinarm");
-    }
-
     @Override
     protected void onPause() {
         super.onPause();
@@ -166,4 +162,9 @@ public class MainActivity extends AppCompatActivity {
     public native boolean hackPause();
     public native boolean hackResume();
     public native boolean hackDestroy();
+
+    static {
+        System.loadLibrary("hackback");
+    }
+
 }

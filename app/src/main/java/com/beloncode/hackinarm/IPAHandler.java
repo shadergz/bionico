@@ -15,8 +15,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import com.beloncode.hackinarm.HackLogger;
-
 class IPAException extends Exception {
     public IPAException(String exceptionMessage) {
         super(exceptionMessage);
