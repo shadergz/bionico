@@ -43,23 +43,30 @@ public class MainActivity extends AppCompatActivity {
                     p_main_logger.release("Can't open the file or no file has been selected");
                     return;
                 }
-                Uri resolveURI = result.getData().getData();
-                String uri_absolute_path = "(Undefined)";
+                Uri file_uri = result.getData().getData();
+                String absolute_ipa_path = "(Undefined)";
 
                 try {
-                    uri_absolute_path = p_main_ipa_handler.handleNewIPAFromUri(resolveURI);
-                } catch (IPAException ipa_exception) {
+                    if (!p_main_ipa_handler.handleNewIpa(file_uri)) {
+                        // We can't add this element inside our list
+                        return;
+                    }
+                    absolute_ipa_path = p_main_ipa_handler.getIpaFilename(file_uri);
+                } catch (IpaException ipa_exception) {
                     p_main_logger.release(Log.WARN, ipa_exception.getMessage());
                 }
                 // Placing new object into the list
-                main_ipa_adapter.placeNewItem(p_main_ipa_handler.getIpaFromName(uri_absolute_path));
+                assert absolute_ipa_path != null;
+                IpaObjectFront object_ipa = p_main_ipa_handler.getIpaObject(absolute_ipa_path);
+                main_ipa_adapter.placeNewItem(object_ipa);
+
                 final String toast_message = String.format("Adding an IPA package with pathname: %s",
-                        uri_absolute_path);
+                        absolute_ipa_path);
                 Toast.makeText(getApplicationContext(), toast_message, Toast.LENGTH_LONG).show();
 
             });
 
-    public void selectIPAFile() {
+    public void selectIpaFile() {
         Intent open_document_provider = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         open_document_provider.setType("*/*");
         open_document_provider.addCategory(Intent.CATEGORY_OPENABLE);
@@ -98,7 +105,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         FloatingActionButton main_add_button = findViewById(R.id.add_button);
-        main_add_button.setOnClickListener(view -> selectIPAFile());
+        main_add_button.setOnClickListener(view -> selectIpaFile());
 
         final Context main_context = getApplicationContext();
         RecyclerView.LayoutManager main_context_list_layout = new LinearLayoutManager(main_context);
@@ -136,10 +143,10 @@ public class MainActivity extends AppCompatActivity {
             }
 
         } else {
-            Intent accessPermissionIntent = new Intent(
+            Intent access_perm_intent = new Intent(
                     Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
             if (!Environment.isExternalStorageEmulated()) {
-                startActivityIfNeeded(accessPermissionIntent, 1);
+                startActivityIfNeeded(access_perm_intent, 1);
             }
         }
 
@@ -153,7 +160,7 @@ public class MainActivity extends AppCompatActivity {
         try {
             // Destroying all IO controllable resources
             p_main_ipa_handler.invalidateAllResources();
-        } catch (IPAException ipaException) {
+        } catch (IpaException ipaException) {
             p_main_logger.release(Log.ERROR, ipaException.getMessage());
         }
     }

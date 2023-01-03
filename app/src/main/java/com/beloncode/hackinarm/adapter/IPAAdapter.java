@@ -9,13 +9,13 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.beloncode.hackinarm.IPAItemFront;
+import com.beloncode.hackinarm.IpaObjectFront;
 import com.beloncode.hackinarm.R;
 
 import java.util.Vector;
 
 class IPAPresentation {
-    IPAPresentation(final IPAItemFront ipa_object) {
+    IPAPresentation(final IpaObjectFront ipa_object) {
         m_ipa_package_name = ipa_object.m_ipa_filename;
     }
     public String m_ipa_package_name;
@@ -25,7 +25,7 @@ public class IPAAdapter extends RecyclerView.Adapter<IPAAdapter.IPAHolder> {
 
     private final Vector<IPAPresentation> m_ipa_collection;
 
-    private IPAPresentation getPresentationFromIPA(final IPAItemFront ipa_item) {
+    private IPAPresentation getPresentationFromIPA(final IpaObjectFront ipa_item) {
         for (IPAPresentation presentation : m_ipa_collection) {
             if (!presentation.m_ipa_package_name.equals(ipa_item.m_ipa_filename)) continue;
             return presentation;
@@ -33,7 +33,7 @@ public class IPAAdapter extends RecyclerView.Adapter<IPAAdapter.IPAHolder> {
         return null;
     }
 
-    private int getPresentationIndex(final IPAItemFront ipa_object) {
+    private int getPresentationIndex(final IpaObjectFront ipa_object) {
         return m_ipa_collection.indexOf(getPresentationFromIPA(ipa_object));
     }
 
@@ -41,7 +41,7 @@ public class IPAAdapter extends RecyclerView.Adapter<IPAAdapter.IPAHolder> {
         m_ipa_collection = new Vector<>();
     }
 
-    public void placeNewItem(final IPAItemFront ipa_item) {
+    public void placeNewItem(final IpaObjectFront ipa_item) {
         final IPAPresentation ipa_present_object = new IPAPresentation(ipa_item);
         m_ipa_collection.add(ipa_present_object);
         // Once added, we can search through the presentation vector and find the exactly
