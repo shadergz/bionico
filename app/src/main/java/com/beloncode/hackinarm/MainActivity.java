@@ -32,24 +32,23 @@ public class MainActivity extends AppCompatActivity {
     final int f_viewerList = R.drawable.ic_baseline_view_list_24;
     final int f_gridList = R.drawable.ic_baseline_grid_view_24;
 
-    int inUseListIcon = f_viewerList;
-    HackLogger p_mainLogger = null;
-    IPAHandler p_mainIPAHandler = null;
+    int m_list_icon = f_viewerList;
+    HackLogger p_main_logger = null;
+    IPAHandler p_main_ipa_handler = null;
 
     ActivityResultLauncher<Intent> getProviderResult = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(), result -> {
                 if (result.getData() == null || result.getResultCode() != RESULT_OK) {
-                    p_mainLogger.release("Can't open the file or no file has been " +
-                            "selected");
+                    p_main_logger.release("Can't open the file or no file has been selected");
                     return;
                 }
                 Uri resolveURI = result.getData().getData();
                 String URIAbsolutePath = "(Undefined)";
 
                 try {
-                    URIAbsolutePath = p_mainIPAHandler.pushIPAFromIPA(resolveURI);
+                    URIAbsolutePath = p_main_ipa_handler.pushIPAFromIPA(resolveURI);
                 } catch (IPAException ipaException) {
-                    p_mainLogger.release(Log.WARN, ipaException.getMessage());
+                    p_main_logger.release(Log.WARN, ipaException.getMessage());
                 }
 
                 final String toastMessage = String.format("Adding an IPA package with pathname: %s",
@@ -74,39 +73,39 @@ public class MainActivity extends AppCompatActivity {
         ActivityMainBinding binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        p_mainLogger = new HackLogger(Log.INFO);
-        p_mainIPAHandler = new IPAHandler(getApplicationContext(), p_mainLogger);
+        p_main_logger = new HackLogger(Log.INFO);
+        p_main_ipa_handler = new IPAHandler(getApplicationContext(), p_main_logger);
 
         hackInitSystem();
-        NavigationBarView mainBarView = findViewById(R.id.nav_screen);
-        mainBarView.setOnItemSelectedListener(item -> {
+        NavigationBarView main_bar_view = findViewById(R.id.nav_screen);
+        main_bar_view.setOnItemSelectedListener(item -> {
             if (item.getItemId() == R.id.view_button) {
-                Drawable listIcon = ResourcesCompat.getDrawable(getResources(), f_viewerList,
+                Drawable list_icon = ResourcesCompat.getDrawable(getResources(), f_viewerList,
                         getTheme());
-                Drawable gridIcon = ResourcesCompat.getDrawable(getResources(), f_gridList,
+                Drawable grid_icon = ResourcesCompat.getDrawable(getResources(), f_gridList,
                         getTheme());
-                if (inUseListIcon == f_viewerList) {
-                    item.setIcon(gridIcon);
-                    inUseListIcon = f_gridList;
+                if (m_list_icon == f_viewerList) {
+                    item.setIcon(grid_icon);
+                    m_list_icon = f_gridList;
                 } else {
-                    item.setIcon(listIcon);
-                    inUseListIcon = f_viewerList;
+                    item.setIcon(list_icon);
+                    m_list_icon = f_viewerList;
                 }
             }
             return true;
         });
 
-        FloatingActionButton mainAddButton = findViewById(R.id.add_button);
-        mainAddButton.setOnClickListener(view -> selectIPAArchive());
+        FloatingActionButton main_add_button = findViewById(R.id.add_button);
+        main_add_button.setOnClickListener(view -> selectIPAArchive());
 
-        final Context mainContext = getApplicationContext();
-        RecyclerView.LayoutManager mainContextListLayout = new LinearLayoutManager(mainContext);
-        IPAAdapter mainIPAAdapter = new IPAAdapter();
+        final Context main_context = getApplicationContext();
+        RecyclerView.LayoutManager main_context_list_layout = new LinearLayoutManager(main_context);
+        IPAAdapter main_ipa_adapter = new IPAAdapter();
 
-        final RecyclerView mainIPAList = findViewById(R.id.ipa_list);
-        mainIPAList.setLayoutManager(mainContextListLayout);
-        mainIPAList.setHasFixedSize(true);
-        mainIPAList.setAdapter(mainIPAAdapter);
+        final RecyclerView main_ipa_list = findViewById(R.id.ipa_list);
+        main_ipa_list.setLayoutManager(main_context_list_layout);
+        main_ipa_list.setHasFixedSize(true);
+        main_ipa_list.setAdapter(main_ipa_adapter);
     }
 
     @Override
@@ -123,16 +122,16 @@ public class MainActivity extends AppCompatActivity {
         /* Requesting the permissions needed by the simulator */
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R)
         {
-            final String readExternalPer = Manifest.permission.READ_EXTERNAL_STORAGE;
-            final String writeExternalPer = Manifest.permission.WRITE_EXTERNAL_STORAGE;
+            final String read_external_per = Manifest.permission.READ_EXTERNAL_STORAGE;
+            final String write_external_per = Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
-            if ((ContextCompat.checkSelfPermission(getApplicationContext(), readExternalPer)
+            if ((ContextCompat.checkSelfPermission(getApplicationContext(), read_external_per)
                     != PackageManager.PERMISSION_GRANTED) ||
-                    (ContextCompat.checkSelfPermission(getApplicationContext(), writeExternalPer)
+                    (ContextCompat.checkSelfPermission(getApplicationContext(), write_external_per)
                     != PackageManager.PERMISSION_GRANTED))
             {
-                final String[] requestPermissions = { readExternalPer, writeExternalPer };
-                ActivityCompat.requestPermissions(this, requestPermissions, 1);
+                final String[] request_permissions = { read_external_per, write_external_per };
+                ActivityCompat.requestPermissions(this, request_permissions, 1);
             }
 
         } else {
@@ -152,9 +151,9 @@ public class MainActivity extends AppCompatActivity {
         getProviderResult.unregister();
         try {
             // Destroying all IO controllable resources
-            p_mainIPAHandler.deleteAllResources();
+            p_main_ipa_handler.deleteAllResources();
         } catch (IPAException ipaException) {
-            p_mainLogger.release(Log.ERROR, ipaException.getMessage());
+            p_main_logger.release(Log.ERROR, ipaException.getMessage());
         }
     }
 

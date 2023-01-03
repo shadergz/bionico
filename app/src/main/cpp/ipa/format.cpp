@@ -12,7 +12,7 @@ namespace hackback::ipa {
         m_ipa_clazz.assign(actual_env->GetObjectClass(ipa_jni_object.get()));
 
         RawPointer<jfieldID> file_descriptor_id = actual_env->GetFieldID(
-                m_ipa_clazz.get(),"m_ParserFD","Landroid/os/ParcelFileDescriptor;");
+                m_ipa_clazz.get(),"m_parser_fd","Landroid/os/ParcelFileDescriptor;");
         RawPointer<jobject> file_descriptor_object = actual_env->GetObjectField(
                 ipa_jni_object.get(), file_descriptor_id.get());
 
@@ -21,10 +21,10 @@ namespace hackback::ipa {
             return;
         }
 
-        RawPointer<jclass> fd_parser_class = actual_env.get()->GetObjectClass(
+        RawPointer<jclass> fd_parser_class = actual_env->GetObjectClass(
                 file_descriptor_object.get());
         RawPointer<jmethodID> get_file_method = actual_env->GetMethodID(
-                fd_parser_class.get(), "getFd","()I");
+                        fd_parser_class.get(), "getFd","()I");
 
         m_fd_access = actual_env->CallIntMethod(
                 file_descriptor_object.get(),get_file_method.get());
@@ -45,10 +45,13 @@ namespace hackback::ipa {
 
     bool detailed_format::fetch_storage_filename() {
 
-        if (m_ipa_filename != nullptr) return false;
+        if (m_ipa_filename.is_valid()) return false;
 
-        char storage_access_path[0x20];
-        char filename_buffer[0x65];
+        constexpr uint STORAGE_ACCESS_SZ = 0x20;
+        constexpr uint FILENAME_BUFFER_SZ = 0x65;
+
+        char storage_access_path[STORAGE_ACCESS_SZ];
+        char filename_buffer[FILENAME_BUFFER_SZ];
 
         snprintf(storage_access_path, sizeof(storage_access_path),
                  "/proc/self/fd/%d", m_fd_access);
@@ -57,8 +60,7 @@ namespace hackback::ipa {
         (read_ret)[filename_buffer] = '\0';
 
         m_ipa_filename = m_env->NewStringUTF(filename_buffer);
-
-        g_logger->back_echo("Real storage absolute filepath for {} fd: {}\n!", m_fd_access,
+        g_logger->back_echo("Real storage absolute filepath for {} fd: {}\n", m_fd_access,
                             filename_buffer);
         return read_ret != 0;
     }

@@ -18,7 +18,7 @@ namespace hackback::common {
             return m_reference;
         }
 
-        [[maybe_unused]] inline T get_as_mut() const {
+        inline T get_as_mut() const {
           return const_cast<T>(m_reference);
         }
 

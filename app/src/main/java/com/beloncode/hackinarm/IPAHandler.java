@@ -23,36 +23,36 @@ class IPAException extends Exception {
 
 public class IPAHandler {
 
-    private final Context p_mainActivityContext;
-    private final HackLogger p_activateLogger;
+    private final Context pf_main_context;
+    private final HackLogger pf_logger;
 
     IPAHandler(Context applicationContext, HackLogger logger) {
-        p_activateLogger = logger;
-        p_mainActivityContext = applicationContext;
-        m_IPAItemList = new ArrayList<>();
+        pf_logger = logger;
+        pf_main_context = applicationContext;
+        m_ipa_list = new ArrayList<>();
     }
 
-    private final ArrayList<IPAItemFront> m_IPAItemList;
+    private final ArrayList<IPAItemFront> m_ipa_list;
 
     // Translating an URI document into an absolute path name
-    final String pushIPAFromIPA(@NonNull Uri ipaFilename) throws IPAException {
+    final String pushIPAFromIPA(@NonNull Uri ipa_filename) throws IPAException {
 
-        final IPAItemFront localIPAItem = new IPAItemFront();
+        final IPAItemFront f_local_item = new IPAItemFront();
 
-        final ContentResolver mainResolver = p_mainActivityContext.getContentResolver();
+        final ContentResolver f_main_resolver = pf_main_context.getContentResolver();
         // File descriptor by himself
-        final FileDescriptor fileDescriptor;
+        final FileDescriptor f_file_desc;
 
         try {
             // Opening the file for read and save his file descriptor inside the fd resolver!
-            localIPAItem.m_ParserFD = mainResolver.openFileDescriptor(ipaFilename, "r");
+            f_local_item.m_parser_fd = f_main_resolver.openFileDescriptor(ipa_filename, "r");
 
-            ParcelFileDescriptor IPAParser = localIPAItem.m_ParserFD;
-            fileDescriptor = IPAParser.getFileDescriptor();
+            ParcelFileDescriptor IPAParser = f_local_item.m_parser_fd;
+            f_file_desc = IPAParser.getFileDescriptor();
 
-            if (!fileDescriptor.valid()) {
+            if (!f_file_desc.valid()) {
                 final String fdException = String.format("File descriptor for %s not valid!",
-                        ipaFilename);
+                        ipa_filename);
                 throw new IPAException(fdException);
             }
         } catch (IOException e) {
@@ -61,70 +61,70 @@ public class IPAHandler {
             throw new IPAException(ioErrorCause);
         }
 
-        localIPAItem.m_FileDescriptor = fileDescriptor;
+        f_local_item.m_descriptor = f_file_desc;
 
-        final int lastReadableLength = m_IPAItemList.size();
-        final int currentReadableLength = openIPAStream(localIPAItem);
-        assert lastReadableLength != currentReadableLength: "No one readable content added into "
-            + "list";
+        final int lastReadableLength = m_ipa_list.size();
+        final int currentReadableLength = openIPAStream(f_local_item);
+        assert lastReadableLength != currentReadableLength:
+                "No one readable content added into list";
 
         // Returning it's filename
-        return localIPAItem.m_IPAFilename;
+        return f_local_item.m_ipa_filename;
     }
 
-    private int openIPAStream(IPAItemFront ipaFile) throws IPAException {
+    private int openIPAStream(IPAItemFront ipa_file) throws IPAException {
 
-        FileDescriptor fileDescriptor = ipaFile.m_FileDescriptor;
-        assert fileDescriptor.valid() : "File descriptor must be valid for this operation";
+        FileDescriptor fd_object = ipa_file.m_descriptor;
+        assert fd_object.valid() : "File descriptor must be valid for this operation";
 
-        final FileInputStream inputStream = new FileInputStream(fileDescriptor);
-        final BufferedInputStream bufferReader = new BufferedInputStream(inputStream);
+        final FileInputStream input_stream = new FileInputStream(fd_object);
+        final BufferedInputStream buffer_reader = new BufferedInputStream(input_stream);
 
         final byte[] localBuffer = new byte[10];
         try {
             // Testing whether we can properly read the file
-            if ((bufferReader.read(localBuffer, 0, localBuffer.length)) == -1) {
+            if ((buffer_reader.read(localBuffer, 0, localBuffer.length)) == -1) {
                 throw new IPAException("The file is no longer available for our use!");
             }
             // Resenting internal file cursor
-            //bufferReader.reset();
+            //buffer_reader.reset();
         } catch (IOException ioException) {
-            final String ioExcept = String.format("Input/Output Exception caused by %s",
+            final String io_except = String.format("Input/Output Exception caused by %s",
                     ioException.getMessage());
-            throw new IPAException(ioExcept);
+            throw new IPAException(io_except);
         }
         // Now that the FileDescriptor is ready and it's valid, we can use it into Backend
-        ipaFile.m_FileInputStream = inputStream;
+        ipa_file.m_stream = input_stream;
 
-        ipaFile.m_IPAFilename = hackPushIPAFile(ipaFile);
-        if (ipaFile.m_IPAFilename == null) {
+        ipa_file.m_ipa_filename = hackPushIPAFile(ipa_file);
+        if (ipa_file.m_ipa_filename == null) {
             throw new IPAException("The IPA package filename couldn't be fetched");
         }
 
-        m_IPAItemList.add(ipaFile);
-        return m_IPAItemList.size();
+        m_ipa_list.add(ipa_file);
+        return m_ipa_list.size();
     }
 
     void deleteAllResources() throws IPAException {
         try {
-            for (IPAItemFront ipaItem : m_IPAItemList) {
+            for (IPAItemFront ipa_item : m_ipa_list) {
                 // Feeding all resources used to handler an IPA Item
-                final FileInputStream fileInputStream = ipaItem.m_FileInputStream;
-                ParcelFileDescriptor contextParser = ipaItem.m_ParserFD;
-                @SuppressLint("DefaultLocale") final String logRela = String.format(
+                final FileInputStream fileInputStream = ipa_item.m_stream;
+                ParcelFileDescriptor contextParser = ipa_item.m_parser_fd;
+                @SuppressLint("DefaultLocale") final String log_rela = String.format(
                         "Destroying relationship with file descriptor %d\n", contextParser.getFd());
-                p_activateLogger.release(logRela);
-                final int ipaFile = contextParser.getFd();
-                assert hackPopIPAFile(ipaFile);
+                pf_logger.release(log_rela);
+                final int ipa_fd = contextParser.getFd();
+                assert hackPopIPAFile(ipa_fd);
 
                 fileInputStream.close();
                 if (contextParser.getFileDescriptor().valid())
                     contextParser.close();
-                m_IPAItemList.remove(ipaItem);
+                m_ipa_list.remove(ipa_item);
             }
-        } catch (IOException ioException) {
+        } catch (IOException io_exception) {
             final String caughtProblem = String.format("Input/Output exception generated because %s",
-                    ioException.getMessage());
+                    io_exception.getMessage());
 
             throw new IPAException(caughtProblem);
         }

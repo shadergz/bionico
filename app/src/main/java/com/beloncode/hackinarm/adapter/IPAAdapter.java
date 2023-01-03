@@ -15,23 +15,23 @@ public class IPAAdapter extends RecyclerView.Adapter<IPAAdapter.IPAHolder> {
 
     static public class IPAHolder extends RecyclerView.ViewHolder {
 
-        TextView ipaAppDisplayName;
+        TextView ipa_app_display_name;
 
-        public IPAHolder(@NonNull View itemView) {
-            super(itemView);
-            ipaAppDisplayName = itemView.findViewById(R.id.ipa_display_name);
+        public IPAHolder(@NonNull View item_view) {
+            super(item_view);
+            ipa_app_display_name = item_view.findViewById(R.id.ipa_display_name);
         }
     }
 
     @NonNull
     @Override
     public IPAAdapter.IPAHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        Context mainContext = parent.getContext();
-        LayoutInflater mainInflater = LayoutInflater.from(mainContext);
-        View ipaItemInMemory = mainInflater.inflate(R.layout.ipa_software_item, parent,
+        Context main_context = parent.getContext();
+        LayoutInflater main_inflater = LayoutInflater.from(main_context);
+        View ipa_item_memory = main_inflater.inflate(R.layout.ipa_software_item, parent,
                 false);
 
-        return new IPAHolder(ipaItemInMemory);
+        return new IPAHolder(ipa_item_memory);
     }
 
     @Override

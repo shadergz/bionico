@@ -27,17 +27,17 @@ namespace hackback::ipa {
         bool fetch_storage_filename();
 
         [[maybe_unused]] const std::string_view get_storage_filename() {
-            auto rawString = m_env->GetStringChars(m_ipa_filename,
-                                                   &m_fn_is_copied);
-            return reinterpret_cast<const char *>(rawString);
+            auto raw_string = m_env->GetStringChars(m_ipa_filename.get(),
+                                                    &m_fn_is_copied);
+            return reinterpret_cast<const char *>(raw_string);
         }
 
-        jstring m_ipa_filename{};
+        RawPointer<jstring> m_ipa_filename{};
         jboolean m_fn_is_copied{};
         int m_fd_access{};
 
         RawPointer<jclass> m_ipa_clazz{};
-        [[maybe_unused]] RawPointer<jclass> m_parent_class{};
+        RawPointer<jclass> m_parent_class{};
         RawPointer<JNIEnv*> m_env{};
     };
 

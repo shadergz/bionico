@@ -6,8 +6,8 @@ import java.io.FileDescriptor;
 import java.io.FileInputStream;
 
 public class IPAItemFront {
-    public String m_IPAFilename;
-    public FileDescriptor m_FileDescriptor;
-    public ParcelFileDescriptor m_ParserFD;
-    public FileInputStream m_FileInputStream;
+    public String m_ipa_filename;
+    public FileDescriptor m_descriptor;
+    public ParcelFileDescriptor m_parser_fd;
+    public FileInputStream m_stream;
 }

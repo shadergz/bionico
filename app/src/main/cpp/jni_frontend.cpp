@@ -44,27 +44,23 @@ namespace hackback {
 
         return true;
     }
-    extern "C"
-    JNIEXPORT jboolean JNICALL Java_com_beloncode_hackinarm_MainActivity_hackPause
+    HACKBACK_EXPORT jboolean JNICALL Java_com_beloncode_hackinarm_MainActivity_hackPause
             (JNIEnv *env, jobject thiz) {
         check_jni_params(env, thiz);
         return true;
     }
-    extern "C"
-    JNIEXPORT jboolean JNICALL Java_com_beloncode_hackinarm_MainActivity_hackResume
+    HACKBACK_EXPORT jboolean JNICALL Java_com_beloncode_hackinarm_MainActivity_hackResume
             (JNIEnv *env, jobject thiz) {
         check_jni_params(env, thiz);
         return true;
     }
-    extern "C"
-    JNIEXPORT jboolean JNICALL Java_com_beloncode_hackinarm_MainActivity_hackDestroy
+    HACKBACK_EXPORT jboolean JNICALL Java_com_beloncode_hackinarm_MainActivity_hackDestroy
             (JNIEnv *env, jobject thiz) {
         check_jni_params(env, thiz);
         return true;
     }
 
-    extern "C"
-    JNIEXPORT jstring JNICALL
+    HACKBACK_EXPORT jstring JNICALL
     Java_com_beloncode_hackinarm_IPAHandler_hackPushIPAFile(JNIEnv *env, jclass clazz,
                                                             jobject file_descriptor) {
         check_jni_params(env, clazz);
@@ -72,17 +68,16 @@ namespace hackback {
         auto ipa_backend_fmt = std::make_shared<ipa::detailed_format>(env, clazz,
                                                                       file_descriptor);
         g_main_ipa_mgr->manager_new_ipa(ipa_backend_fmt);
-        return ipa_backend_fmt->m_ipa_filename;
+        return ipa_backend_fmt->m_ipa_filename.get_as_mut();
     }
-    extern "C"
-    JNIEXPORT jboolean JNICALL
+    HACKBACK_EXPORT jboolean JNICALL
     Java_com_beloncode_hackinarm_IPAHandler_hackPopIPAFile(JNIEnv *env, jclass clazz,
                                                            jint ipa_file_descriptor_index) {
         check_jni_params(env, clazz);
 
         const auto ipa_result = g_main_ipa_mgr->attempt_rm_ipa(ipa_file_descriptor_index);
         if (ipa_result) {
-            g_logger->back_echo("IPA package with {} has detached\n",
+            g_logger->back_echo("IPA package with {} was detached\n",
                                 ipa_file_descriptor_index);
         }
         return ipa_result;
