@@ -33,36 +33,38 @@ public class MainActivity extends AppCompatActivity {
     final int f_gridList = R.drawable.ic_baseline_grid_view_24;
 
     int m_list_icon = f_viewerList;
-    HackLogger p_main_logger = null;
-    IPAHandler p_main_ipa_handler = null;
+    private HackLogger p_main_logger = null;
+    private IPAHandler p_main_ipa_handler = null;
+    private IPAAdapter main_ipa_adapter = null;
 
-    ActivityResultLauncher<Intent> getProviderResult = registerForActivityResult(
+    ActivityResultLauncher<Intent> get_provider_result = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(), result -> {
                 if (result.getData() == null || result.getResultCode() != RESULT_OK) {
                     p_main_logger.release("Can't open the file or no file has been selected");
                     return;
                 }
                 Uri resolveURI = result.getData().getData();
-                String URIAbsolutePath = "(Undefined)";
+                String uri_absolute_path = "(Undefined)";
 
                 try {
-                    URIAbsolutePath = p_main_ipa_handler.pushIPAFromIPA(resolveURI);
-                } catch (IPAException ipaException) {
-                    p_main_logger.release(Log.WARN, ipaException.getMessage());
+                    uri_absolute_path = p_main_ipa_handler.handleNewIPAFromUri(resolveURI);
+                } catch (IPAException ipa_exception) {
+                    p_main_logger.release(Log.WARN, ipa_exception.getMessage());
                 }
-
-                final String toastMessage = String.format("Adding an IPA package with pathname: %s",
-                        URIAbsolutePath);
-                Toast.makeText(getApplicationContext(), toastMessage, Toast.LENGTH_LONG).show();
+                // Placing new object into the list
+                main_ipa_adapter.placeNewItem(p_main_ipa_handler.getIpaFromName(uri_absolute_path));
+                final String toast_message = String.format("Adding an IPA package with pathname: %s",
+                        uri_absolute_path);
+                Toast.makeText(getApplicationContext(), toast_message, Toast.LENGTH_LONG).show();
 
             });
 
-    public void selectIPAArchive() {
-        Intent openDocumentProvider = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-        openDocumentProvider.setType("*/*");
-        openDocumentProvider.addCategory(Intent.CATEGORY_OPENABLE);
+    public void selectIPAFile() {
+        Intent open_document_provider = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        open_document_provider.setType("*/*");
+        open_document_provider.addCategory(Intent.CATEGORY_OPENABLE);
 
-        getProviderResult.launch(openDocumentProvider);
+        get_provider_result.launch(open_document_provider);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.R)
@@ -96,15 +98,14 @@ public class MainActivity extends AppCompatActivity {
         });
 
         FloatingActionButton main_add_button = findViewById(R.id.add_button);
-        main_add_button.setOnClickListener(view -> selectIPAArchive());
+        main_add_button.setOnClickListener(view -> selectIPAFile());
 
         final Context main_context = getApplicationContext();
         RecyclerView.LayoutManager main_context_list_layout = new LinearLayoutManager(main_context);
-        IPAAdapter main_ipa_adapter = new IPAAdapter();
+        main_ipa_adapter = new IPAAdapter();
 
         final RecyclerView main_ipa_list = findViewById(R.id.ipa_list);
         main_ipa_list.setLayoutManager(main_context_list_layout);
-        main_ipa_list.setHasFixedSize(true);
         main_ipa_list.setAdapter(main_ipa_adapter);
     }
 
@@ -148,10 +149,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         hackDestroy();
-        getProviderResult.unregister();
+        get_provider_result.unregister();
         try {
             // Destroying all IO controllable resources
-            p_main_ipa_handler.deleteAllResources();
+            p_main_ipa_handler.invalidateAllResources();
         } catch (IPAException ipaException) {
             p_main_logger.release(Log.ERROR, ipaException.getMessage());
         }

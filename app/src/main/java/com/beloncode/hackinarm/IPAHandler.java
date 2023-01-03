@@ -14,6 +14,7 @@ import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Objects;
 
 class IPAException extends Exception {
     public IPAException(String exceptionMessage) {
@@ -34,8 +35,17 @@ public class IPAHandler {
 
     private final ArrayList<IPAItemFront> m_ipa_list;
 
+    final IPAItemFront getIpaFromName(@NonNull String ipa_filename) {
+        for (IPAItemFront ipa_item : m_ipa_list) {
+            if (!Objects.equals(ipa_item.m_ipa_filename, ipa_filename)) continue;
+
+            return ipa_item;
+        }
+        return null;
+    }
+
     // Translating an URI document into an absolute path name
-    final String pushIPAFromIPA(@NonNull Uri ipa_filename) throws IPAException {
+    final String handleNewIPAFromUri(@NonNull Uri ipa_filename) throws IPAException {
 
         final IPAItemFront f_local_item = new IPAItemFront();
 
@@ -64,7 +74,7 @@ public class IPAHandler {
         f_local_item.m_descriptor = f_file_desc;
 
         final int lastReadableLength = m_ipa_list.size();
-        final int currentReadableLength = openIPAStream(f_local_item);
+        final int currentReadableLength = openIPAStreamBuffer(f_local_item);
         assert lastReadableLength != currentReadableLength:
                 "No one readable content added into list";
 
@@ -72,7 +82,7 @@ public class IPAHandler {
         return f_local_item.m_ipa_filename;
     }
 
-    private int openIPAStream(IPAItemFront ipa_file) throws IPAException {
+    private int openIPAStreamBuffer(IPAItemFront ipa_file) throws IPAException {
 
         FileDescriptor fd_object = ipa_file.m_descriptor;
         assert fd_object.valid() : "File descriptor must be valid for this operation";
@@ -105,7 +115,7 @@ public class IPAHandler {
         return m_ipa_list.size();
     }
 
-    void deleteAllResources() throws IPAException {
+    void invalidateAllResources() throws IPAException {
         try {
             for (IPAItemFront ipa_item : m_ipa_list) {
                 // Feeding all resources used to handler an IPA Item
