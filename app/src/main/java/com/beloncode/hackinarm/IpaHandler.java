@@ -5,10 +5,8 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
-
 import java.io.BufferedInputStream;
 
 import java.io.FileDescriptor;
@@ -17,19 +15,19 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 class IpaException extends Exception {
-    public IpaException(String exceptionMessage) {
-        super(exceptionMessage);
+    public IpaException(String exception_msg) {
+        super(exception_msg);
     }
 }
 
-public class IPAHandler {
+public class IpaHandler {
 
     private final Context pf_main_context;
     private final HackLogger pf_logger;
 
-    IPAHandler(Context applicationContext, HackLogger logger) {
+    IpaHandler(Context app_context, HackLogger logger) {
         pf_logger = logger;
-        pf_main_context = applicationContext;
+        pf_main_context = app_context;
         m_ipa_list = new ArrayList<>();
     }
 
@@ -71,7 +69,7 @@ public class IPAHandler {
             // IPA is already inside our list, we can't added one more time!
             final String error_str = String.format("Object with URI %s already inside our list!",
                     ipa_uri);
-            pf_logger.release(Log.ERROR, error_str);
+            pf_logger.releaseMessage(HackLogger.ERROR_LEVEL, error_str, true);
             return false;
         }
         final IpaObjectFront local_item = new IpaObjectFront();
@@ -101,15 +99,21 @@ public class IPAHandler {
 
         local_item.m_descriptor = f_file_desc;
 
-        final int last_readable_length = m_ipa_list.size();
-        final int current_readable_length = openIPAStreamBuffer(local_item);
-        assert last_readable_length != current_readable_length:
-                "No one readable content added into list";
-        // Returning it's filename
+        if (!openIpaStreamBuffer(local_item)) {
+            pf_logger.releaseMessage(HackLogger.ERROR_LEVEL,
+                    "Can't add the new ipa inside the list", false);
+            return false;
+        }
+
         return true;
     }
 
-    private int openIPAStreamBuffer(IpaObjectFront ipa_file) throws IpaException {
+    private boolean fastIpaFileValidation(final byte[] ipa_entry) {
+        final byte[] ipa_header = {0x50, 0x4b};
+        return ipa_entry[0] == ipa_header[0] && ipa_entry[1] == ipa_header[1];
+    }
+
+    private boolean openIpaStreamBuffer(IpaObjectFront ipa_file) throws IpaException {
 
         FileDescriptor fd_object = ipa_file.m_descriptor;
         assert fd_object.valid() : "File descriptor must be valid for this operation";
@@ -123,8 +127,13 @@ public class IPAHandler {
             if ((buffer_reader.read(local_buffer, 0, local_buffer.length)) == -1) {
                 throw new IpaException("The file is no longer available for our use!");
             }
-            // Resenting internal file cursor
-            //buffer_reader.reset();
+
+            if (!fastIpaFileValidation(local_buffer)) {
+                pf_logger.releaseMessage(HackLogger.ERROR_LEVEL,
+                        "None a IPA file, or may the file is corrupted!", true);
+                return false;
+            }
+
         } catch (IOException io_exception) {
             final String io_except = String.format("Input/Output Exception caused by %s",
                     io_exception.getMessage());
@@ -139,7 +148,7 @@ public class IPAHandler {
         }
 
         m_ipa_list.add(ipa_file);
-        return m_ipa_list.size();
+        return true;
     }
 
     void invalidateAllResources() throws IpaException {
@@ -148,15 +157,21 @@ public class IPAHandler {
                 // Feeding all resources used to handler an IPA Item
                 final FileInputStream file_input = ipa_item.m_stream;
                 ParcelFileDescriptor context_parser = ipa_item.m_parser_fd;
+
                 @SuppressLint("DefaultLocale") final String log_rela = String.format(
-                        "Destroying relationship with file descriptor %d\n", context_parser.getFd());
-                pf_logger.release(log_rela);
+                        "Destroying relationship with file descriptor %d\n",
+                        context_parser.getFd());
+
+                pf_logger.releaseMessage(log_rela);
+
                 final int ipa_fd = context_parser.getFd();
                 assert hackPopIpaFile(ipa_fd);
 
                 file_input.close();
+
                 if (context_parser.getFileDescriptor().valid())
                     context_parser.close();
+
                 m_ipa_list.remove(ipa_item);
             }
         } catch (IOException io_exception) {

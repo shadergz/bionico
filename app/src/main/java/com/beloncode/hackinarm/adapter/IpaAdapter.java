@@ -14,19 +14,19 @@ import com.beloncode.hackinarm.R;
 
 import java.util.Vector;
 
-class IPAPresentation {
-    IPAPresentation(final IpaObjectFront ipa_object) {
+class IpaPresentation {
+    IpaPresentation(final IpaObjectFront ipa_object) {
         m_ipa_package_name = ipa_object.m_ipa_filename;
     }
     public String m_ipa_package_name;
 }
 
-public class IPAAdapter extends RecyclerView.Adapter<IPAAdapter.IPAHolder> {
+public class IpaAdapter extends RecyclerView.Adapter<IpaAdapter.IPAHolder> {
 
-    private final Vector<IPAPresentation> m_ipa_collection;
+    private final Vector<IpaPresentation> m_ipa_collection;
 
-    private IPAPresentation getPresentationFromIPA(final IpaObjectFront ipa_item) {
-        for (IPAPresentation presentation : m_ipa_collection) {
+    private IpaPresentation getPresentationFromIPA(final IpaObjectFront ipa_item) {
+        for (IpaPresentation presentation : m_ipa_collection) {
             if (!presentation.m_ipa_package_name.equals(ipa_item.m_ipa_filename)) continue;
             return presentation;
         }
@@ -37,12 +37,12 @@ public class IPAAdapter extends RecyclerView.Adapter<IPAAdapter.IPAHolder> {
         return m_ipa_collection.indexOf(getPresentationFromIPA(ipa_object));
     }
 
-    public IPAAdapter() {
+    public IpaAdapter() {
         m_ipa_collection = new Vector<>();
     }
 
     public void placeNewItem(final IpaObjectFront ipa_item) {
-        final IPAPresentation ipa_present_object = new IPAPresentation(ipa_item);
+        final IpaPresentation ipa_present_object = new IpaPresentation(ipa_item);
         m_ipa_collection.add(ipa_present_object);
         // Once added, we can search through the presentation vector and find the exactly
         // position of our object!
@@ -61,7 +61,7 @@ public class IPAAdapter extends RecyclerView.Adapter<IPAAdapter.IPAHolder> {
 
     @NonNull
     @Override
-    public IPAAdapter.IPAHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public IpaAdapter.IPAHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         Context main_context = parent.getContext();
         LayoutInflater main_inflater = LayoutInflater.from(main_context);
         View ipa_item_memory = main_inflater.inflate(R.layout.ipa_software_item, parent,
@@ -72,7 +72,7 @@ public class IPAAdapter extends RecyclerView.Adapter<IPAAdapter.IPAHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull IPAHolder holder, int position) {
-        final IPAPresentation generate_ipa = m_ipa_collection.get(position);
+        final IpaPresentation generate_ipa = m_ipa_collection.get(position);
         TextView ipa_object_text = holder.ipa_app_display_name;
         ipa_object_text.setText(generate_ipa.m_ipa_package_name);
     }

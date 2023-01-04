@@ -20,10 +20,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.Settings;
-import android.util.Log;
-import android.widget.Toast;
 
-import com.beloncode.hackinarm.adapter.IPAAdapter;
+import com.beloncode.hackinarm.adapter.IpaAdapter;
 import com.beloncode.hackinarm.databinding.ActivityMainBinding;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationBarView;
@@ -34,13 +32,15 @@ public class MainActivity extends AppCompatActivity {
 
     int m_list_icon = f_viewerList;
     private HackLogger p_main_logger = null;
-    private IPAHandler p_main_ipa_handler = null;
-    private IPAAdapter main_ipa_adapter = null;
+    private IpaHandler p_main_ipa_handler = null;
+    private IpaAdapter main_ipa_adapter = null;
 
     ActivityResultLauncher<Intent> get_provider_result = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(), result -> {
                 if (result.getData() == null || result.getResultCode() != RESULT_OK) {
-                    p_main_logger.release("Can't open the file or no file has been selected");
+                    p_main_logger.releaseMessage(HackLogger.ERROR_LEVEL,
+                            "Can't open the file or no file has been selected",
+                            true);
                     return;
                 }
                 Uri file_uri = result.getData().getData();
@@ -53,7 +53,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                     absolute_ipa_path = p_main_ipa_handler.getIpaFilename(file_uri);
                 } catch (IpaException ipa_exception) {
-                    p_main_logger.release(Log.WARN, ipa_exception.getMessage());
+                    p_main_logger.releaseMessage(HackLogger.WARN_LEVEL, ipa_exception.getMessage());
                 }
                 // Placing new object into the list
                 assert absolute_ipa_path != null;
@@ -62,8 +62,7 @@ public class MainActivity extends AppCompatActivity {
 
                 final String toast_message = String.format("Adding an IPA package with pathname: %s",
                         absolute_ipa_path);
-                Toast.makeText(getApplicationContext(), toast_message, Toast.LENGTH_LONG).show();
-
+                p_main_logger.releaseMessage(HackLogger.USER_LEVEL, toast_message, true);
             });
 
     public void selectIpaFile() {
@@ -82,8 +81,8 @@ public class MainActivity extends AppCompatActivity {
         ActivityMainBinding binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        p_main_logger = new HackLogger(Log.INFO);
-        p_main_ipa_handler = new IPAHandler(getApplicationContext(), p_main_logger);
+        p_main_logger = new HackLogger(HackLogger.DEBUG_LEVEL, getApplicationContext());
+        p_main_ipa_handler = new IpaHandler(getApplicationContext(), p_main_logger);
 
         hackInitSystem();
         NavigationBarView main_bar_view = findViewById(R.id.nav_screen);
@@ -109,7 +108,7 @@ public class MainActivity extends AppCompatActivity {
 
         final Context main_context = getApplicationContext();
         RecyclerView.LayoutManager main_context_list_layout = new LinearLayoutManager(main_context);
-        main_ipa_adapter = new IPAAdapter();
+        main_ipa_adapter = new IpaAdapter();
 
         final RecyclerView main_ipa_list = findViewById(R.id.ipa_list);
         main_ipa_list.setLayoutManager(main_context_list_layout);
@@ -161,7 +160,7 @@ public class MainActivity extends AppCompatActivity {
             // Destroying all IO controllable resources
             p_main_ipa_handler.invalidateAllResources();
         } catch (IpaException ipaException) {
-            p_main_logger.release(Log.ERROR, ipaException.getMessage());
+            p_main_logger.releaseMessage(HackLogger.ERROR_LEVEL, ipaException.getMessage());
         }
     }
 

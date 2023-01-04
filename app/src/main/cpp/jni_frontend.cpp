@@ -61,7 +61,7 @@ namespace hackback {
     }
 
     HACKBACK_EXPORT jstring JNICALL
-    Java_com_beloncode_hackinarm_IPAHandler_hackPushIpaFile(JNIEnv *env, jclass clazz,
+    Java_com_beloncode_hackinarm_IpaHandler_hackPushIpaFile(JNIEnv *env, jclass clazz,
                                                             jobject file_descriptor) {
         check_jni_params(env, clazz);
 
@@ -71,7 +71,7 @@ namespace hackback {
         return ipa_backend_fmt->m_ipa_filename.get_as_mut();
     }
     HACKBACK_EXPORT jboolean JNICALL
-    Java_com_beloncode_hackinarm_IPAHandler_hackPopIpaFile(JNIEnv *env, jclass clazz,
+    Java_com_beloncode_hackinarm_IpaHandler_hackPopIpaFile(JNIEnv *env, jclass clazz,
                                                            jint ipa_file_descriptor_index) {
         check_jni_params(env, clazz);
 
