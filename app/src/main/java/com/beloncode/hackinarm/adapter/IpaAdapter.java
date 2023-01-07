@@ -9,76 +9,77 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.beloncode.hackinarm.IpaObjectFront;
+import com.beloncode.hackinarm.IpaObject;
 import com.beloncode.hackinarm.R;
 
 import java.util.Vector;
 
 class IpaPresentation {
-    IpaPresentation(final IpaObjectFront ipa_object) {
-        m_ipa_package_name = ipa_object.m_ipa_filename;
+    IpaPresentation(final IpaObject ipaObject) {
+        packageName = ipaObject.ipaFilename;
     }
-    public String m_ipa_package_name;
+
+    public String packageName;
 }
 
-public class IpaAdapter extends RecyclerView.Adapter<IpaAdapter.IPAHolder> {
+public class IpaAdapter extends RecyclerView.Adapter<IpaAdapter.IpaHolder> {
 
-    private final Vector<IpaPresentation> m_ipa_collection;
+    private final Vector<IpaPresentation> ipaCollection;
 
-    private IpaPresentation getPresentationFromIPA(final IpaObjectFront ipa_item) {
-        for (IpaPresentation presentation : m_ipa_collection) {
-            if (!presentation.m_ipa_package_name.equals(ipa_item.m_ipa_filename)) continue;
+    private IpaPresentation getPresentationFromIpa(final IpaObject ipaItem) {
+        for (IpaPresentation presentation : ipaCollection) {
+            if (!presentation.packageName.equals(ipaItem.ipaFilename)) continue;
             return presentation;
         }
         return null;
     }
 
-    private int getPresentationIndex(final IpaObjectFront ipa_object) {
-        return m_ipa_collection.indexOf(getPresentationFromIPA(ipa_object));
+    private int getPresentationIndex(final IpaObject ipaObject) {
+        return ipaCollection.indexOf(getPresentationFromIpa(ipaObject));
     }
 
     public IpaAdapter() {
-        m_ipa_collection = new Vector<>();
+        ipaCollection = new Vector<>();
     }
 
-    public void placeNewItem(final IpaObjectFront ipa_item) {
-        final IpaPresentation ipa_present_object = new IpaPresentation(ipa_item);
-        m_ipa_collection.add(ipa_present_object);
+    public void placeNewItem(final IpaObject ipaItem) {
+        final IpaPresentation ipaPresentObject = new IpaPresentation(ipaItem);
+        ipaCollection.add(ipaPresentObject);
         // Once added, we can search through the presentation vector and find the exactly
         // position of our object!
-        notifyItemChanged(getPresentationIndex(ipa_item));
+        notifyItemChanged(getPresentationIndex(ipaItem));
     }
 
-    static public class IPAHolder extends RecyclerView.ViewHolder {
+    static public class IpaHolder extends RecyclerView.ViewHolder {
 
-        TextView ipa_app_display_name;
+        TextView ipaAppDspName;
 
-        public IPAHolder(@NonNull View item_view) {
-            super(item_view);
-            ipa_app_display_name = item_view.findViewById(R.id.ipa_display_name);
+        public IpaHolder(@NonNull View itemView) {
+            super(itemView);
+            ipaAppDspName = itemView.findViewById(R.id.ipa_display_name);
         }
     }
 
     @NonNull
     @Override
-    public IpaAdapter.IPAHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        Context main_context = parent.getContext();
-        LayoutInflater main_inflater = LayoutInflater.from(main_context);
-        View ipa_item_memory = main_inflater.inflate(R.layout.ipa_software_item, parent,
+    public IpaHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        Context mainContext = parent.getContext();
+        LayoutInflater mainInflater = LayoutInflater.from(mainContext);
+        View ipaItemMem = mainInflater.inflate(R.layout.ipa_software_item, parent,
                 false);
 
-        return new IPAHolder(ipa_item_memory);
+        return new IpaHolder(ipaItemMem);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull IPAHolder holder, int position) {
-        final IpaPresentation generate_ipa = m_ipa_collection.get(position);
-        TextView ipa_object_text = holder.ipa_app_display_name;
-        ipa_object_text.setText(generate_ipa.m_ipa_package_name);
+    public void onBindViewHolder(@NonNull IpaHolder holder, int position) {
+        final IpaPresentation generateIpa = ipaCollection.get(position);
+        TextView ipaObjectText = holder.ipaAppDspName;
+        ipaObjectText.setText(generateIpa.packageName);
     }
 
     @Override
     public int getItemCount() {
-        return m_ipa_collection.size();
+        return ipaCollection.size();
     }
 }

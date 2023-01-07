@@ -23,8 +23,8 @@ namespace hackback {
 
             fmt::format_to(std::back_inserter(message_buffer), format, variables...);
             (message_buffer.size())[message_buffer.data()] = '\0';
-            __android_log_write(static_cast<int>(m_current_priority),gs_backend_tag.data(),
-                                reinterpret_cast<const char*>(message_buffer.data()));
+            __android_log_write(static_cast<int>(m_current_priority), gs_backend_tag.data(),
+                                reinterpret_cast<const char *>(message_buffer.data()));
         }
 
         template<typename... Args>
@@ -37,6 +37,7 @@ namespace hackback {
         void change_level(android_LogPriority new_level) {
             m_current_priority = new_level;
         }
+
     private:
         android_LogPriority m_current_priority = ANDROID_LOG_DEBUG;
 
@@ -44,21 +45,35 @@ namespace hackback {
             assert("Logging level not implemented yet!" == nullptr);
         }
 
-        void format_level(fmt::memory_buffer& out_buffer) {
+        void format_level(fmt::memory_buffer &out_buffer) {
 
             switch (m_current_priority) {
-            case ANDROID_LOG_UNKNOWN:
-                assert("Unknown priority level specified" == nullptr);
-            case ANDROID_LOG_DEFAULT:   trap_not_impl(); break;
-            case ANDROID_LOG_VERBOSE:   trap_not_impl(); break;
-            case ANDROID_LOG_DEBUG:
-                fmt::format_to(std::back_inserter(out_buffer), "Slayer [Debug]: ");
-                break;
-            case ANDROID_LOG_INFO:      trap_not_impl(); break;
-            case ANDROID_LOG_WARN:      trap_not_impl(); break;
-            case ANDROID_LOG_ERROR:     trap_not_impl(); break;
-            case ANDROID_LOG_FATAL:     trap_not_impl(); break;
-            case ANDROID_LOG_SILENT:    trap_not_impl(); break;
+                case ANDROID_LOG_UNKNOWN:
+                    assert("Unknown priority level specified" == nullptr);
+                case ANDROID_LOG_DEFAULT:
+                    trap_not_impl();
+                    break;
+                case ANDROID_LOG_VERBOSE:
+                    trap_not_impl();
+                    break;
+                case ANDROID_LOG_DEBUG:
+                    fmt::format_to(std::back_inserter(out_buffer), "Slayer [Debug]: ");
+                    break;
+                case ANDROID_LOG_INFO:
+                    trap_not_impl();
+                    break;
+                case ANDROID_LOG_WARN:
+                    trap_not_impl();
+                    break;
+                case ANDROID_LOG_ERROR:
+                    trap_not_impl();
+                    break;
+                case ANDROID_LOG_FATAL:
+                    trap_not_impl();
+                    break;
+                case ANDROID_LOG_SILENT:
+                    trap_not_impl();
+                    break;
             }
 
         }

@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.18.1)
 
 project(hackback)
 
-add_subdirectory(dependencies/fmt EXCLUDE_FROM_ALL)
+add_subdirectory(deps/fmt EXCLUDE_FROM_ALL)
 
 add_library(hackback MODULE)
 target_sources(hackback PRIVATE jni_frontend.cpp runtime_resources.cpp ipa/format.cpp)

@@ -11,6 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
+        android:backgroundTint="@color/nav_color_base"
         app:fabCradleMargin="10dp"
         app:fabCradleRoundedCornerRadius="10dp"
         app:fabCradleVerticalOffset="10dp">
@@ -22,7 +23,7 @@
             android:layout_gravity="bottom"
             android:layout_marginEnd="15dp"
             app:itemHorizontalTranslationEnabled="true"
-            app:itemBackground="@color/nav_white"
+            app:itemBackground="@color/nav_color_base"
             android:background="@drawable/nav_color"
             app:menu="@menu/bottom_nav_menu"/>
     </com.google.android.material.bottomappbar.BottomAppBar>

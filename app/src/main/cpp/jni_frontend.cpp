@@ -15,14 +15,15 @@ enum class SOCVendor {
 class SOCId {
 public:
     constexpr SOCId(std::string_view soc_name, SOCVendor vendor) : m_soc_name(soc_name),
-        m_soc_vendor(vendor) {}
+                                                                   m_soc_vendor(vendor) {}
+
     [[maybe_unused]] const std::string_view m_soc_name;
     [[maybe_unused]] SOCVendor m_soc_vendor = SOCVendor::SOC_UNKNOWN;
 };
 
 [[maybe_unused]] constexpr std::tuple<SOCId, int> gs_compatibility[2] = {
-        {{"SM7125", SOCVendor::SOC_SNAPDRAGON}, 10},
-        {{"HelioG96", SOCVendor::SOC_MEDIATEK}, 01}
+        {{"SM7125",   SOCVendor::SOC_SNAPDRAGON}, 10},
+        {{"HelioG96", SOCVendor::SOC_MEDIATEK},   01}
 };
 
 #define HACKBACK_EXPORT extern "C" JNIEXPORT
@@ -30,13 +31,13 @@ public:
 namespace hackback {
     using namespace common;
 
-    HACKBACK_EXPORT jboolean JNICALL Java_com_beloncode_hackinarm_MainActivity_hackInitSystem
-            (JNIEnv* env, jobject thiz) {
+    HACKBACK_EXPORT jboolean JNICALL Java_com_beloncode_hackinarm_MainActivity_engineInitSystem
+            (JNIEnv *env, jobject thiz) {
         g_env.assign(env);
         g_main_class.assign(thiz);
         check_jni_params(env, thiz);
 
-        // Creating IPA Manager now, and locating its configuration
+        // Creating Ipa Manager now, and locating its configuration
         g_logger = std::make_shared<SlayerLogger>();
         g_main_ipa_mgr = std::make_shared<ipa::IpaManager>();
 
@@ -44,42 +45,46 @@ namespace hackback {
 
         return true;
     }
-    HACKBACK_EXPORT jboolean JNICALL Java_com_beloncode_hackinarm_MainActivity_hackPause
+    HACKBACK_EXPORT jboolean JNICALL Java_com_beloncode_hackinarm_MainActivity_enginePause
             (JNIEnv *env, jobject thiz) {
         check_jni_params(env, thiz);
         return true;
     }
-    HACKBACK_EXPORT jboolean JNICALL Java_com_beloncode_hackinarm_MainActivity_hackResume
+    HACKBACK_EXPORT jboolean JNICALL Java_com_beloncode_hackinarm_MainActivity_engineResume
             (JNIEnv *env, jobject thiz) {
         check_jni_params(env, thiz);
         return true;
     }
-    HACKBACK_EXPORT jboolean JNICALL Java_com_beloncode_hackinarm_MainActivity_hackDestroy
+    HACKBACK_EXPORT jboolean JNICALL Java_com_beloncode_hackinarm_MainActivity_engineDestroy
             (JNIEnv *env, jobject thiz) {
         check_jni_params(env, thiz);
         return true;
     }
 
-    HACKBACK_EXPORT jstring JNICALL
-    Java_com_beloncode_hackinarm_IpaHandler_hackPushIpaFile(JNIEnv *env, jclass clazz,
-                                                            jobject file_descriptor) {
+    HACKBACK_EXPORT jint JNICALL
+    Java_com_beloncode_hackinarm_IpaHandler_engineCtrlIpa(JNIEnv *env, jclass clazz, jobject file_descriptor) {
         check_jni_params(env, clazz);
 
-        auto ipa_backend_fmt = std::make_shared<ipa::detailed_format>(env, clazz,
+        auto ipa_object = std::make_shared<ipa::detailed_format>(env, clazz,
                                                                       file_descriptor);
-        g_main_ipa_mgr->manager_new_ipa(ipa_backend_fmt);
-        return ipa_backend_fmt->m_ipa_filename.get_as_mut();
+        g_main_ipa_mgr->manager_new_ipa(ipa_object);
+        return g_main_ipa_mgr->find_ipa_index(ipa_object);
     }
-    HACKBACK_EXPORT jboolean JNICALL
-    Java_com_beloncode_hackinarm_IpaHandler_hackPopIpaFile(JNIEnv *env, jclass clazz,
-                                                           jint ipa_file_descriptor_index) {
+    HACKBACK_EXPORT jint JNICALL
+    Java_com_beloncode_hackinarm_IpaHandler_engineDownIpa(JNIEnv *env, jclass clazz,
+                                                          jobject ipa_item) {
         check_jni_params(env, clazz);
 
-        const auto ipa_result = g_main_ipa_mgr->attempt_rm_ipa(ipa_file_descriptor_index);
+        auto ipa_block = std::make_shared<ipa::detailed_format>(env, clazz, ipa_item);
+
+        const jint ipa_location = g_main_ipa_mgr->find_ipa_index(ipa_block);
+        const bool ipa_result = g_main_ipa_mgr->attempt_rm_ipa(ipa_block);
+
         if (ipa_result) {
-            g_logger->back_echo("IPA package with {} was detached\n",
-                                ipa_file_descriptor_index);
+            g_logger->back_echo("Ipa package located at {} was detached\n",
+                                static_cast<void*>(ipa_item));
         }
-        return ipa_result;
+
+        return ipa_location;
     }
 }

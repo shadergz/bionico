@@ -13,7 +13,7 @@ namespace hackback::ipa {
 
     class detailed_format {
     public:
-        detailed_format(RawPointer<JNIEnv*> actual_env, RawPointer<jclass> parent_clazz,
+        detailed_format(RawPointer<JNIEnv *> actual_env, RawPointer<jclass> parent_clazz,
                         RawPointer<jobject> ipa_jni_object);
 
         ~detailed_format() {
@@ -26,19 +26,12 @@ namespace hackback::ipa {
 
         bool fetch_storage_filename();
 
-        [[maybe_unused]] const std::string_view get_storage_filename() {
-            auto raw_string = m_env->GetStringChars(m_ipa_filename.get(),
-                                                    &m_fn_is_copied);
-            return reinterpret_cast<const char *>(raw_string);
-        }
-
-        RawPointer<jstring> m_ipa_filename{};
-        jboolean m_fn_is_copied{};
+        std::unique_ptr<std::string> m_ipa_filename;
         int m_fd_access{};
 
         RawPointer<jclass> m_ipa_clazz{};
         RawPointer<jclass> m_parent_class{};
-        RawPointer<JNIEnv*> m_env{};
+        RawPointer<JNIEnv *> m_env{};
     };
 
     using ipa_object = std::shared_ptr<detailed_format>;
