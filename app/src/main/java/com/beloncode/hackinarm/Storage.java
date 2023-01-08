@@ -64,7 +64,7 @@ public class Storage extends MainActivity {
             new ActivityResultContracts.StartActivityForResult(), result -> {
                 if (result.getData() == null || result.getResultCode() != RESULT_OK) {
                     mainLogger.releaseMessage(HackLogger.ERROR_LEVEL,
-                            "Can't open the file or no file has been selected",
+                            "Can't open the desired folder, or no one is specified",
                             true);
                     return;
                 }

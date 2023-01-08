@@ -48,11 +48,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         mainLogger = new HackLogger(HackLogger.DEBUG_LEVEL);
-        try {
-            mainStorage = new Storage();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
+
         mainIpaHandler = new IpaHandler();
         mainCoreInstaller = new IpaInstaller();
 
@@ -95,7 +91,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        mainStorage.release();
+
         engineResume();
 
         /* Requesting the permissions needed by the simulator */
@@ -119,12 +115,21 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
+        try {
+            mainStorage = new Storage();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         engineDestroy();
+
+        if (mainStorage != null)
+            mainStorage.release();
 
         try {
             // Destroying all IO controllable resources
