@@ -51,8 +51,7 @@ public class IpaAdapter extends RecyclerView.Adapter<IpaAdapter.IpaHolder> {
     }
 
     static public class IpaHolder extends RecyclerView.ViewHolder {
-
-        TextView ipaAppDspName;
+        final TextView ipaAppDspName;
 
         public IpaHolder(@NonNull View itemView) {
             super(itemView);
@@ -73,7 +72,7 @@ public class IpaAdapter extends RecyclerView.Adapter<IpaAdapter.IpaHolder> {
     @Override
     public void onBindViewHolder(@NonNull IpaHolder holder, int position) {
         final IpaPresentation generateIpa = ipaCollection.get(position);
-        TextView ipaObjectText = holder.ipaAppDspName;
+        final TextView ipaObjectText = holder.ipaAppDspName;
         ipaObjectText.setText(generateIpa.packageName);
     }
 

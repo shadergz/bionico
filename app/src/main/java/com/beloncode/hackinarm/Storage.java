@@ -1,14 +1,12 @@
 package com.beloncode.hackinarm;
 
 import android.content.ContentValues;
-import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.net.Uri;
 
 import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -18,7 +16,7 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.Vector;
 
-public class Storage extends MainActivity {
+public class Storage {
 
     // Saving non dynamic resources values, so on we can avoid queries call and work as
     // ahead of time!
@@ -29,31 +27,34 @@ public class Storage extends MainActivity {
     private final StorageDBHelper dbSystemRes;
     private final ExternalDBHelper dbExternRes;
 
+    MainActivity mainContext;
+    ActivityResultLauncher<Intent> selectExternalDir;
+
     private File currentExternalDir;
     private File[] filesList;
-    private final String[] addonRequiredDirs = new String[]{
+    private final String[] addonRequiredDirs = new String[] {
             "Storage", "System"
     };
 
-    boolean isPathsDefault() {
+    boolean isExternalDirDefined() {
         final Map<String, String> defValues = dbSystemRes.defUndefinedValues;
 
-        if (!defValues.containsValue(queriedPaths.get(getStorageIndex(
-                StoragePathIndexes.STORAGE_EXT_DIR)))) return false;
-
-        return defValues.containsValue(queriedPaths.get(getStorageIndex(
-                StoragePathIndexes.STORAGE_EXT_DATABASE_PATH)));
+        return !defValues.containsValue(queriedPaths.get(getStorageIndex(
+                StoragePathIndexes.STORAGE_EXT_DIR)));
     }
 
-    public Storage(final Context mainActivity) throws FileNotFoundException {
-        dbSystemRes = new StorageDBHelper(mainActivity);
+    public Storage(final MainActivity mainActivity, ActivityResultLauncher<Intent> lambOpenExternalDir) throws FileNotFoundException {
+
+        dbSystemRes = new StorageDBHelper(mainActivity.getApplicationContext());
 
         dbSystemR = dbSystemRes.getReadableDatabase();
         dbSystemW = dbSystemRes.getWritableDatabase();
+        mainContext = mainActivity;
+        selectExternalDir = lambOpenExternalDir;
 
         assert updateExternalPaths();
 
-        if (isPathsDefault()) {
+        if (!isExternalDirDefined()) {
             requestExternalStorage();
             updateExternalPaths();
         }
@@ -61,7 +62,7 @@ public class Storage extends MainActivity {
         if (!currentExternalDir.exists()) {
             final String errorProblem = String.format("Can't read the main external directory in %s",
                     currentExternalDir.getAbsolutePath());
-            mainLogger.releaseMessage(HackLogger.ERROR_LEVEL, errorProblem, true);
+            mainContext.getLogger().releaseMessage(HackLogger.ERROR_LEVEL, errorProblem, true);
             throw new FileNotFoundException();
         }
 
@@ -70,30 +71,22 @@ public class Storage extends MainActivity {
                 queriedPaths.get(getStorageIndex(StoragePathIndexes.STORAGE_EXT_DATABASE_PATH))
         );
 
-        dbExternRes = new ExternalDBHelper(getApplicationContext(), dbAbsolutePath);
+        dbExternRes = new ExternalDBHelper(mainActivity, dbAbsolutePath);
     }
 
-    ActivityResultLauncher<Intent> getExternalDirectory = registerForActivityResult(
-            new ActivityResultContracts.StartActivityForResult(), result -> {
-                if (result.getData() == null || result.getResultCode() != RESULT_OK) {
-                    mainLogger.releaseMessage(HackLogger.ERROR_LEVEL,
-                            "Can't open the desired folder, or no one is specified",
-                            true);
-                    return;
-                }
-                Uri fileUri = result.getData().getData();
-                currentExternalDir = new File(fileUri.getPath());
+    @NonNull
+    public final String getExternalPath() {
+        return currentExternalDir.getAbsolutePath();
+    }
 
-                try {
-                    if (!checkoutDirectories(currentExternalDir)) {
-                        createMainDirectories(currentExternalDir);
-                    }
-                } catch (IOException ioExcept) {
-                    ioExcept.printStackTrace();
-                }
-                saveExternalStoragePath(currentExternalDir.getAbsolutePath());
+    public final File getExternal() {
+        return currentExternalDir;
+    }
 
-            });
+    public void setExternal(@NonNull final File newExtDir) {
+        if (!newExtDir.exists() && newExtDir.isFile()) return;
+        currentExternalDir = newExtDir;
+    }
 
     boolean checkoutDirectories(File extDir) throws IOException {
         if (extDir.exists()) return false;
@@ -133,7 +126,7 @@ public class Storage extends MainActivity {
             if (!mkDirResult) {
                 final String errorString = String.format("Can't create a directory called: " +
                         "%s, as a subdirectory of %s", regFolder, folder.getAbsolutePath());
-                mainLogger.releaseMessage(HackLogger.ERROR_LEVEL, errorString, true);
+                mainContext.getLogger().releaseMessage(HackLogger.ERROR_LEVEL, errorString, true);
             }
         }
     }
@@ -144,7 +137,7 @@ public class Storage extends MainActivity {
         openExtProvider.setType("*/*");
         openExtProvider.addCategory(Intent.CATEGORY_OPENABLE);
 
-        getExternalDirectory.launch(openExtProvider);
+        selectExternalDir.launch(openExtProvider);
     }
 
     void saveExternalStoragePath(final String extDirectory) {

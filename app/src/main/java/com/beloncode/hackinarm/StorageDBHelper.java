@@ -33,7 +33,7 @@ public class StorageDBHelper extends SQLiteOpenHelper {
         initializeUserDb(db);
     }
 
-    public Map<String, String> defUndefinedValues = new HashMap<>();
+    public final Map<String, String> defUndefinedValues = new HashMap<>();
 
     public void initializeUserDb(final SQLiteDatabase dbWritable) {
         final ContentValues dbInitialValues = new ContentValues();

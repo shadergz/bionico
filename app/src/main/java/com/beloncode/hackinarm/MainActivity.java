@@ -5,11 +5,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.Settings;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -24,36 +27,99 @@ import com.beloncode.hackinarm.ipa.IpaInstaller;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationBarView;
 
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity {
-    final int viewerList = R.drawable.ic_baseline_view_list_24;
-    final int gridList = R.drawable.ic_baseline_grid_view_24;
+    private final int viewerList = R.drawable.ic_baseline_view_list_24;
+    private final int gridList = R.drawable.ic_baseline_grid_view_24;
 
-    int listIcon = viewerList;
-    public HackLogger mainLogger = null;
-    public IpaInstaller mainCoreInstaller = null;
-    public IpaHandler mainIpaHandler = null;
-    public IpaAdapter mainIpaAdapter = null;
-    public Storage mainStorage = null;
+    private int listIcon = viewerList;
+    private HackLogger mainLogger = null;
+    private IpaInstaller mainCoreInstaller = null;
+    private IpaHandler mainIpaHandler = null;
+    private IpaAdapter mainIpaAdapter = null;
+    private Storage mainStorage = null;
+
+    private ActivityResultLauncher<Intent> getExternalDirectory;
+    private ActivityResultLauncher<Intent> getIpaFromContent;
 
     @RequiresApi(api = Build.VERSION_CODES.R)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        getExternalDirectory = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(), result -> {
+                    if (result.getData() == null || result.getResultCode() != RESULT_OK) {
+                        mainLogger.releaseMessage(HackLogger.ERROR_LEVEL,
+                                "Can't open the desired folder, or no one is specified",
+                                true);
+                        return;
+                    }
+                    Uri fileUri = result.getData().getData();
+                    mainStorage.setExternal(new File(fileUri.getPath()));
+
+                    try {
+                        if (!mainStorage.checkoutDirectories(mainStorage.getExternal())) {
+                            // Create all directories if they not exist yet!
+                            mainStorage.createMainDirectories(mainStorage.getExternal());
+                        }
+                    } catch (IOException ioExcept) {
+                        mainLogger.releaseMessage(HackLogger.ERROR_LEVEL, ioExcept.getMessage());
+                        return;
+                    }
+                    mainStorage.saveExternalStoragePath(mainStorage.getExternalPath());
+
+                });
+
+        getIpaFromContent = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(), result -> {
+                    if (result.getData() == null || result.getResultCode() != RESULT_OK) {
+                        final String errorOne = "Can't open the file or no file has been selected";
+                        mainLogger.releaseMessage(HackLogger.ERROR_LEVEL, errorOne, true);
+                        return;
+                    }
+                    Intent ipaIntent = result.getData();
+                    IpaObject newIpaObject = new IpaObject(ipaIntent);
+
+                    final File ipaFile = newIpaObject.getRegularFile();
+
+                    if (!ipaFile.isFile() || !ipaFile.canRead()) {
+                        final String cantRead = String.format("Can't read file (%s), isn't a regular file!",
+                                ipaFile.getAbsolutePath());
+                        mainLogger.releaseMessage(HackLogger.ERROR_LEVEL, cantRead);
+                    }
+
+                    try {
+                        mainIpaHandler.handleNewIpa(newIpaObject);
+                        mainCoreInstaller.installNewIpa(newIpaObject);
+
+                    } catch (IpaException ipaException) {
+                        final String ipaError = String.format("Error occurred while tried to handler a " +
+                                "new Ipa object, with file path: %s", ipaFile.getAbsolutePath());
+                        mainLogger.releaseMessage(HackLogger.ERROR_LEVEL, ipaError);
+                    }
+
+                    mainIpaAdapter.placeNewItem(newIpaObject);
+                    final String toastMessage = String.format("Adding an Ipa package with filename: %s",
+                            newIpaObject.ipaFilename);
+                    mainLogger.releaseMessage(HackLogger.USER_LEVEL, toastMessage, true);
+                });
+
         engineInitSystem();
 
         ActivityMainBinding binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        mainLogger = new HackLogger(HackLogger.DEBUG_LEVEL);
+        mainLogger = new HackLogger(this, HackLogger.DEBUG_LEVEL);
 
-        mainIpaHandler = new IpaHandler();
+        mainIpaHandler = new IpaHandler(this, getIpaFromContent);
         mainCoreInstaller = new IpaInstaller();
 
         try {
-            mainStorage = new Storage(getApplicationContext());
+            mainStorage = new Storage(this, getExternalDirectory);
         } catch (FileNotFoundException eFileNotFound) {
             eFileNotFound.printStackTrace();
         }
@@ -86,6 +152,10 @@ public class MainActivity extends AppCompatActivity {
         final RecyclerView mainIpaList = findViewById(R.id.ipa_list);
         mainIpaList.setLayoutManager(mainCtxListLayout);
         mainIpaList.setAdapter(mainIpaAdapter);
+    }
+
+    public HackLogger getLogger() {
+        return mainLogger;
     }
 
     @Override
@@ -126,11 +196,12 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+
+        getExternalDirectory.unregister();
+        getIpaFromContent.unregister();
+
         engineDestroy();
-
-        if (mainStorage != null)
-            mainStorage.release();
-
+        if (mainStorage != null) mainStorage.release();
         try {
             // Destroying all IO controllable resources
             mainIpaHandler.invalidateAllResources();

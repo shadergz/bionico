@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.os.ParcelFileDescriptor;
 
 import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 
 import java.io.BufferedInputStream;
@@ -22,53 +21,24 @@ class IpaException extends Exception {
     }
 }
 
-public class IpaHandler extends MainActivity {
+public class IpaHandler {
+
+    MainActivity mainActivity;
+    ActivityResultLauncher<Intent> openNewIpa;
     private final ArrayList<IpaObject> ipaList;
 
-    IpaHandler() {
+    IpaHandler(MainActivity activity, ActivityResultLauncher<Intent> lambOpenNewIpa) {
         ipaList = new ArrayList<>();
+        mainActivity = activity;
+        openNewIpa = lambOpenNewIpa;
     }
-
-    ActivityResultLauncher<Intent> getIpaFromContent = registerForActivityResult(
-            new ActivityResultContracts.StartActivityForResult(), result -> {
-                if (result.getData() == null || result.getResultCode() != RESULT_OK) {
-                    final String errorOne = "Can't open the file or no file has been selected";
-                    mainLogger.releaseMessage(HackLogger.ERROR_LEVEL, errorOne, true);
-                    return;
-                }
-                Intent ipaIntent = result.getData();
-                IpaObject newIpaObject = new IpaObject(ipaIntent);
-
-                final File ipaFile = newIpaObject.getRegularFile();
-
-                if (!ipaFile.isFile() || !ipaFile.canRead()) {
-                    final String cantRead = String.format("Can't read file (%s), isn't a regular file!",
-                            ipaFile.getAbsolutePath());
-                    mainLogger.releaseMessage(HackLogger.ERROR_LEVEL, cantRead);
-                }
-
-                try {
-                    handleNewIpa(newIpaObject);
-                    mainCoreInstaller.installNewIpa(newIpaObject);
-
-                } catch (IpaException ipaException) {
-                    final String ipaError = String.format("Error occurred while tried to handler a " +
-                            "new Ipa object, with file path: %s", ipaFile.getAbsolutePath());
-                    mainLogger.releaseMessage(HackLogger.ERROR_LEVEL, ipaError);
-                }
-
-                mainIpaAdapter.placeNewItem(newIpaObject);
-                final String toastMessage = String.format("Adding an Ipa package with filename: %s",
-                        newIpaObject.ipaFilename);
-                mainLogger.releaseMessage(HackLogger.USER_LEVEL, toastMessage, true);
-            });
 
     public void selectIpaFile() {
         Intent openDocumentProvider = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         openDocumentProvider.setType("*/*");
         openDocumentProvider.addCategory(Intent.CATEGORY_OPENABLE);
 
-        getIpaFromContent.launch(openDocumentProvider);
+        openNewIpa.launch(openDocumentProvider);
     }
 
     private boolean verifyForIpaOccurrence(final IpaObject ipaObject) {
@@ -83,10 +53,10 @@ public class IpaHandler extends MainActivity {
             final String errorStr = String.format("Object with Uri %s already is inside our list!",
                     ipaObject.ipaUri.toString());
 
-            mainLogger.releaseMessage(HackLogger.ERROR_LEVEL, errorStr, true);
+            mainActivity.getLogger().releaseMessage(HackLogger.ERROR_LEVEL, errorStr, true);
             return;
         }
-        final ContentResolver fMainResolver = getContentResolver();
+        final ContentResolver fMainResolver = mainActivity.getContentResolver();
         // File descriptor by himself
         final FileDescriptor fileDesc;
 
@@ -105,7 +75,7 @@ public class IpaHandler extends MainActivity {
             }
 
             if (!testIpaStreaming(ipaObject)) {
-                mainLogger.releaseMessage(HackLogger.ERROR_LEVEL,
+                mainActivity.getLogger().releaseMessage(HackLogger.ERROR_LEVEL,
                         "Can't add the new ipa inside the list", false);
             }
         } catch (IOException ioExcept) {
@@ -125,7 +95,7 @@ public class IpaHandler extends MainActivity {
         if (!ipaAsbFile.getCanonicalPath().endsWith(".ipa")) return false;
 
         // Testing the file MIME type and finalizing the testing stage!
-        final ContentResolver mimeResolver = getContentResolver();
+        final ContentResolver mimeResolver = mainActivity.getContentResolver();
         String extensionMime = mimeResolver.getType(ipaObject.ipaUri);
 
         return extensionMime.equals("application/octet-stream");
@@ -147,7 +117,7 @@ public class IpaHandler extends MainActivity {
             }
 
             if (!fastIpaFileValidation(localBuffer) && !checkFileExtensionWithMime(ipaObject)) {
-                mainLogger.releaseMessage(HackLogger.ERROR_LEVEL,
+                mainActivity.getLogger().releaseMessage(HackLogger.ERROR_LEVEL,
                         "None a Ipa file, or may the file is corrupted!", true);
                 return false;
             }
@@ -175,13 +145,13 @@ public class IpaHandler extends MainActivity {
             final String logRela = String.format("Destroying relationship with file descriptor %d",
                     contextParser.getFd());
 
-            mainLogger.releaseMessage(logRela);
+            mainActivity.getLogger().releaseMessage(logRela);
 
             final int objectedDown = engineDownIpa(ipaCollected);
             if (objectedDown != -1) {
                 @SuppressLint("DefaultLocale")
                 final String objReport = String.format("Object with id %d removed", objectedDown);
-                mainLogger.releaseMessage(objReport);
+                mainActivity.getLogger().releaseMessage(objReport);
             }
 
             try {
@@ -198,7 +168,7 @@ public class IpaHandler extends MainActivity {
 
             ipaList.remove(ipaCollected);
         }
-        getIpaFromContent.unregister();
+
     }
 
     static native int engineCtrlIpa(IpaObject ipaItem);

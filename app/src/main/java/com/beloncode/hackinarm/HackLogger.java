@@ -3,7 +3,7 @@ package com.beloncode.hackinarm;
 import android.util.Log;
 import android.widget.Toast;
 
-public class HackLogger extends MainActivity {
+public class HackLogger {
 
     public final static int DEBUG_LEVEL = 0;
     public final static int VERBOSE_LEVEL = 1;
@@ -13,8 +13,10 @@ public class HackLogger extends MainActivity {
     public final static int INFO_LEVEL = 5;
 
     private final int defLogMax;
+    private final MainActivity mainActivity;
 
-    HackLogger(int defaultLog) {
+    HackLogger(MainActivity activity, int defaultLog) {
+        mainActivity = activity;
         defLogMax = defaultLog;
     }
 
@@ -36,7 +38,7 @@ public class HackLogger extends MainActivity {
             case INFO_LEVEL:
         }
         if (adviseUser) {
-            Toast.makeText(getApplicationContext(), frontMsg, Toast.LENGTH_SHORT).show();
+            Toast.makeText(mainActivity.getApplicationContext(), frontMsg, Toast.LENGTH_SHORT).show();
         }
     }
 
