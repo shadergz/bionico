@@ -58,7 +58,7 @@ public class IpaHandler extends MainActivity {
                 }
 
                 mainIpaAdapter.placeNewItem(newIpaObject);
-                final String toastMessage = String.format("Adding an Ipa package with pathname: %s",
+                final String toastMessage = String.format("Adding an Ipa package with filename: %s",
                         newIpaObject.ipaFilename);
                 mainLogger.releaseMessage(HackLogger.USER_LEVEL, toastMessage, true);
             });
@@ -80,7 +80,7 @@ public class IpaHandler extends MainActivity {
 
         if (verifyForIpaOccurrence(ipaObject)) {
             // IPA is already inside our list, we can't added one more time!
-            final String errorStr = String.format("Object with Uri %s already inside our list!",
+            final String errorStr = String.format("Object with Uri %s already is inside our list!",
                     ipaObject.ipaUri.toString());
 
             mainLogger.releaseMessage(HackLogger.ERROR_LEVEL, errorStr, true);
@@ -120,6 +120,17 @@ public class IpaHandler extends MainActivity {
         return ipaEntry[0] == ipaHeader[0] && ipaEntry[1] == ipaHeader[1];
     }
 
+    private boolean checkFileExtensionWithMime(IpaObject ipaObject) throws IOException {
+        final File ipaAsbFile = ipaObject.getRegularFile();
+        if (!ipaAsbFile.getCanonicalPath().endsWith(".ipa")) return false;
+
+        // Testing the file MIME type and finalizing the testing stage!
+        final ContentResolver mimeResolver = getContentResolver();
+        String extensionMime = mimeResolver.getType(ipaObject.ipaUri);
+
+        return extensionMime.equals("application/octet-stream");
+    }
+
     private boolean testIpaStreaming(IpaObject ipaObject) throws IpaException {
 
         FileDescriptor fdObject = ipaObject.fDescriptor;
@@ -135,7 +146,7 @@ public class IpaHandler extends MainActivity {
                 throw new IpaException("The file is no longer available for our use!");
             }
 
-            if (!fastIpaFileValidation(localBuffer)) {
+            if (!fastIpaFileValidation(localBuffer) && !checkFileExtensionWithMime(ipaObject)) {
                 mainLogger.releaseMessage(HackLogger.ERROR_LEVEL,
                         "None a Ipa file, or may the file is corrupted!", true);
                 return false;
@@ -160,7 +171,8 @@ public class IpaHandler extends MainActivity {
             final FileInputStream fInput = ipaCollected.readableStream;
             ParcelFileDescriptor contextParser = ipaCollected.openableFParser;
 
-            @SuppressLint("DefaultLocale") final String logRela = String.format("Destroying relationship with file descriptor %d",
+            @SuppressLint("DefaultLocale")
+            final String logRela = String.format("Destroying relationship with file descriptor %d",
                     contextParser.getFd());
 
             mainLogger.releaseMessage(logRela);
@@ -168,8 +180,7 @@ public class IpaHandler extends MainActivity {
             final int objectedDown = engineDownIpa(ipaCollected);
             if (objectedDown != -1) {
                 @SuppressLint("DefaultLocale")
-                final String objReport = String.format("Object with id %d removed",
-                        objectedDown);
+                final String objReport = String.format("Object with id %d removed", objectedDown);
                 mainLogger.releaseMessage(objReport);
             }
 
