@@ -40,6 +40,7 @@ public class HackLogger extends MainActivity {
         }
     }
 
+    @SuppressWarnings("SameParameterValue")
     void releaseMessage(final int logLevel, final String message) {
         detachMessage(logLevel, message, false);
     }

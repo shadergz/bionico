@@ -5,7 +5,10 @@ project(hackback)
 add_subdirectory(deps/fmt EXCLUDE_FROM_ALL)
 
 add_library(hackback MODULE)
-target_sources(hackback PRIVATE jni_frontend.cpp runtime_resources.cpp ipa/format.cpp)
+target_sources(hackback PRIVATE
+        jni_frontend.cpp
+        runtime_resources.cpp
+        ipa/format.cpp)
 
 target_include_directories(hackback PRIVATE ${CMAKE_SOURCE_DIR})
 

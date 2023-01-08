@@ -41,7 +41,7 @@ namespace hackback {
         g_logger = std::make_shared<SlayerLogger>();
         g_main_ipa_mgr = std::make_shared<ipa::IpaManager>();
 
-        g_logger->back_echo("Backend system initialized!");
+        g_logger->back_echo("Backend system initialized!\n");
 
         return true;
     }

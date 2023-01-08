@@ -19,7 +19,7 @@ namespace hackback::ipa {
                 ipa_jni_object.get(), file_descriptor_id.get());
 
         if (!file_descriptor_object.is_valid()) {
-            g_logger->back_echo("Can't found Ipa file descriptor 'fDescriptor' field");
+            g_logger->back_echo("Can't found Ipa file descriptor 'fDescriptor' field\n");
             return;
         }
 
@@ -33,7 +33,7 @@ namespace hackback::ipa {
 
         actual_env->DeleteLocalRef(fd_parser_class.get());
         if (m_fd_access <= 0) {
-            g_logger->back_echo("Can't fetch an real file descriptor for item: {}",
+            g_logger->back_echo("Can't fetch an real file descriptor for item: {}\n",
                                 static_cast<void *>(ipa_jni_object.get()));
             return;
         }
@@ -62,7 +62,7 @@ namespace hackback::ipa {
 
         m_ipa_filename = std::make_unique<std::string>(filename_buffer);
 
-        g_logger->back_echo("Real storage absolute filepath for {} fd: {}", m_fd_access,
+        g_logger->back_echo("Real storage absolute filepath for {} fd: {}\n", m_fd_access,
                             filename_buffer);
         return read_ret != 0;
     }

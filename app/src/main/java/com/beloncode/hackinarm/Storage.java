@@ -46,7 +46,7 @@ public class Storage extends MainActivity {
         }
 
         if (!currentExternalDir.exists()) {
-            final String errorProblem = String.format("Can't read a main external directory in %s\n",
+            final String errorProblem = String.format("Can't read the main external directory in %s",
                     currentExternalDir.getAbsolutePath());
             mainLogger.releaseMessage(HackLogger.ERROR_LEVEL, errorProblem, true);
             throw new FileNotFoundException();
@@ -119,7 +119,7 @@ public class Storage extends MainActivity {
             final boolean mkDirResult = newFileHandler.mkdir();
             if (!mkDirResult) {
                 final String errorString = String.format("Can't create a directory called: " +
-                        "%s, as a subdirectory of %s\n", regFolder, folder.getAbsolutePath());
+                        "%s, as a subdirectory of %s", regFolder, folder.getAbsolutePath());
                 mainLogger.releaseMessage(HackLogger.ERROR_LEVEL, errorString, true);
             }
         }

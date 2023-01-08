@@ -1,8 +1,8 @@
 package com.beloncode.hackinarm;
 
 import android.content.Intent;
-import android.os.ParcelFileDescriptor;
 import android.net.Uri;
+import android.os.ParcelFileDescriptor;
 
 import androidx.annotation.NonNull;
 
@@ -24,6 +24,7 @@ public class IpaObject {
     final File getRegularFile() {
         return ipaFile;
     }
+
     @NonNull
     final Uri getRegularUri() {
         return ipaUri;

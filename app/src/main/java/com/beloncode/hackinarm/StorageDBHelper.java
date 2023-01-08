@@ -10,7 +10,7 @@ public class StorageDBHelper extends SQLiteOpenHelper {
 
     public static final int DATABASE_VERSION = 1;
     public static final String DATABASE_FILEPATH = AppDBContract.APP_DB_FILEPATH;
-
+    
     public StorageDBHelper(Context context) {
         super(context, DATABASE_FILEPATH, null, DATABASE_VERSION);
     }

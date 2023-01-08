@@ -1,13 +1,5 @@
 package com.beloncode.hackinarm;
 
-import androidx.annotation.RequiresApi;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.core.content.res.ResourcesCompat;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
@@ -17,6 +9,14 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.Settings;
+
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.core.content.res.ResourcesCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.beloncode.hackinarm.adapter.IpaAdapter;
 import com.beloncode.hackinarm.databinding.ActivityMainBinding;
@@ -74,11 +74,11 @@ public class MainActivity extends AppCompatActivity {
             return true;
         });
 
-        FloatingActionButton mainAddButton = findViewById(R.id.add_button);
+        final FloatingActionButton mainAddButton = findViewById(R.id.add_button);
         mainAddButton.setOnClickListener(view -> mainIpaHandler.selectIpaFile());
 
         final Context mainContext = getApplicationContext();
-        RecyclerView.LayoutManager mainCtxListLayout = new LinearLayoutManager(mainContext);
+        final RecyclerView.LayoutManager mainCtxListLayout = new LinearLayoutManager(mainContext);
         mainIpaAdapter = new IpaAdapter();
 
         final RecyclerView mainIpaList = findViewById(R.id.ipa_list);

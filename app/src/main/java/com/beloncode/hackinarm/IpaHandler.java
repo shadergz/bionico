@@ -10,7 +10,6 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 
 import java.io.BufferedInputStream;
-
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
@@ -121,12 +120,12 @@ public class IpaHandler extends MainActivity {
         return ipaEntry[0] == ipaHeader[0] && ipaEntry[1] == ipaHeader[1];
     }
 
-    private boolean testIpaStreaming(IpaObject ipaFile) throws IpaException {
+    private boolean testIpaStreaming(IpaObject ipaObject) throws IpaException {
 
-        FileDescriptor fdObject = ipaFile.fDescriptor;
+        FileDescriptor fdObject = ipaObject.fDescriptor;
         assert fdObject.valid() : "File descriptor must be valid for this operation";
 
-        final FileInputStream iStream = ipaFile.readableStream = new FileInputStream(fdObject);
+        final FileInputStream iStream = ipaObject.readableStream = new FileInputStream(fdObject);
         final BufferedInputStream bufferReader = new BufferedInputStream(iStream);
 
         final byte[] localBuffer = new byte[10];
@@ -148,9 +147,9 @@ public class IpaHandler extends MainActivity {
             throw new IpaException(exceptMessage);
         }
 
-        engineCtrlIpa(ipaFile);
+        engineCtrlIpa(ipaObject);
 
-        ipaList.add(ipaFile);
+        ipaList.add(ipaObject);
         return true;
     }
 
