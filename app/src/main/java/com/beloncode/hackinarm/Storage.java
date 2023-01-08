@@ -15,13 +15,14 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Vector;
 
 public class Storage extends MainActivity {
 
     // Saving non dynamic resources values, so on we can avoid queries call and work as
     // ahead of time!
-    ArrayList<String> queriedPaths = null;
+    ArrayList<String> queriedPaths = new ArrayList<>();
     private final SQLiteDatabase dbSystemR;
     private final SQLiteDatabase dbSystemW;
 
@@ -34,16 +35,27 @@ public class Storage extends MainActivity {
             "Storage", "System"
     };
 
+    boolean isPathsDefault() {
+        final Map<String, String> defValues = dbSystemRes.defUndefinedValues;
+
+        if (!defValues.containsValue(queriedPaths.get(getStorageIndex(
+                StoragePathIndexes.STORAGE_EXT_DIR)))) return false;
+
+        return defValues.containsValue(queriedPaths.get(getStorageIndex(
+                StoragePathIndexes.STORAGE_EXT_DATABASE_PATH)));
+    }
+
     public Storage(final Context mainActivity) throws FileNotFoundException {
         dbSystemRes = new StorageDBHelper(mainActivity);
+
         dbSystemR = dbSystemRes.getReadableDatabase();
         dbSystemW = dbSystemRes.getWritableDatabase();
 
-        ArrayList<String> externalDir = getExternalPaths();
+        assert updateExternalPaths();
 
-        if (externalDir.size() != 2) {
+        if (isPathsDefault()) {
             requestExternalStorage();
-            externalDir = getExternalPaths();
+            updateExternalPaths();
         }
 
         if (!currentExternalDir.exists()) {
@@ -54,8 +66,8 @@ public class Storage extends MainActivity {
         }
 
         final String dbAbsolutePath = String.format("%s/%s",
-                externalDir.get(StoragePathIndexes.STORAGE_EXT_DIR.ordinal()),
-                externalDir.get(StoragePathIndexes.STORAGE_EXT_DATABASE_PATH.ordinal())
+                queriedPaths.get(getStorageIndex(StoragePathIndexes.STORAGE_EXT_DIR)),
+                queriedPaths.get(getStorageIndex(StoragePathIndexes.STORAGE_EXT_DATABASE_PATH))
         );
 
         dbExternRes = new ExternalDBHelper(getApplicationContext(), dbAbsolutePath);
@@ -128,8 +140,10 @@ public class Storage extends MainActivity {
 
     void requestExternalStorage() {
         Intent openExtProvider = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
+
         openExtProvider.setType("*/*");
         openExtProvider.addCategory(Intent.CATEGORY_OPENABLE);
+
         getExternalDirectory.launch(openExtProvider);
     }
 
@@ -149,10 +163,8 @@ public class Storage extends MainActivity {
     }
 
     public void release() {
-        if (dbSystemR.isOpen())
-            dbSystemR.close();
-        if (dbSystemW.isOpen())
-            dbSystemW.close();
+        if (dbSystemR.isOpen()) dbSystemR.close();
+        if (dbSystemW.isOpen()) dbSystemW.close();
 
         dbSystemRes.close();
         dbExternRes.close();
@@ -163,32 +175,33 @@ public class Storage extends MainActivity {
         STORAGE_EXT_DATABASE_PATH
     }
 
-    final ArrayList<String> getExternalPaths() {
+    final int getStorageIndex(StoragePathIndexes index) {
+        return index.ordinal();
+    }
 
-        if (queriedPaths.size() == 2) return queriedPaths;
+    private final String[] firstRow = new String[]{
+            "1"
+    };
 
+    final boolean updateExternalPaths() {
         final String filepathDir = AppDBContract.StorageContent.COL_FILEPATH_EXT_DIR;
         final String dbPathDir = AppDBContract.StorageContent.COL_FILEPATH_EXT_DB;
+        final String targetTable = AppDBContract.StorageContent.TABLE_STORAGE_NAME;
 
         final String[] columnName = new String[]{filepathDir, dbPathDir};
-        String targetTable = AppDBContract.StorageContent.TABLE_STORAGE_NAME;
         Cursor tableCursor = dbSystemR.query(targetTable, columnName,
-                null, null, null, null, null);
-        assert tableCursor != null;
-        tableCursor.moveToFirst();
-
-        final ArrayList<String> pathContents = new ArrayList<>();
+                "_id = ?", firstRow, null, null, null);
+        if (tableCursor == null) return false;
 
         try {
-            final int tableIndex = tableCursor.getColumnIndexOrThrow(targetTable);
-            while (tableCursor.moveToNext()) {
-                pathContents.add(tableCursor.getString(tableIndex));
-            }
+            tableCursor.moveToNext();
+
+            queriedPaths.add(tableCursor.getString(tableCursor.getColumnIndexOrThrow(filepathDir)));
+            queriedPaths.add(tableCursor.getString(tableCursor.getColumnIndexOrThrow(dbPathDir)));
         } finally {
             tableCursor.close();
         }
-        queriedPaths = pathContents;
 
-        return queriedPaths;
+        return true;
     }
 }

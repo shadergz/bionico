@@ -52,6 +52,12 @@ public class MainActivity extends AppCompatActivity {
         mainIpaHandler = new IpaHandler();
         mainCoreInstaller = new IpaInstaller();
 
+        try {
+            mainStorage = new Storage(getApplicationContext());
+        } catch (FileNotFoundException eFileNotFound) {
+            eFileNotFound.printStackTrace();
+        }
+
         NavigationBarView mainBarView = findViewById(R.id.nav_screen);
         mainBarView.setOnItemSelectedListener(item -> {
             if (item.getItemId() == R.id.view_button) {
@@ -113,12 +119,6 @@ public class MainActivity extends AppCompatActivity {
             if (!Environment.isExternalStorageEmulated()) {
                 startActivityIfNeeded(accessPermIntent, 1);
             }
-        }
-
-        try {
-            mainStorage = new Storage(getApplicationContext());
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
         }
 
     }
