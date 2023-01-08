@@ -59,7 +59,11 @@ public class MainActivity extends AppCompatActivity {
                         return;
                     }
                     Uri fileUri = result.getData().getData();
-                    mainStorage.setExternal(new File(fileUri.getPath()));
+
+                    final File directoryHandler = new File(Environment.getExternalStorageDirectory(),
+                            fileUri.getPath());
+
+                    mainStorage.setExternal(directoryHandler);
 
                     try {
                         if (!mainStorage.checkoutDirectories(mainStorage.getExternal())) {
@@ -115,14 +119,8 @@ public class MainActivity extends AppCompatActivity {
 
         mainLogger = new HackLogger(this, HackLogger.DEBUG_LEVEL);
 
-        mainIpaHandler = new IpaHandler(this, getIpaFromContent);
+        mainIpaHandler = new IpaHandler(this);
         mainCoreInstaller = new IpaInstaller();
-
-        try {
-            mainStorage = new Storage(this, getExternalDirectory);
-        } catch (FileNotFoundException eFileNotFound) {
-            eFileNotFound.printStackTrace();
-        }
 
         NavigationBarView mainBarView = findViewById(R.id.nav_screen);
         mainBarView.setOnItemSelectedListener(item -> {
@@ -142,8 +140,15 @@ public class MainActivity extends AppCompatActivity {
             return true;
         });
 
+        try {
+            mainStorage = new Storage(this);
+        } catch (FileNotFoundException eFileNotFound) {
+            mainLogger.releaseMessage(HackLogger.ERROR_LEVEL, eFileNotFound.getMessage());
+            eFileNotFound.printStackTrace();
+        }
+
         final FloatingActionButton mainAddButton = findViewById(R.id.add_button);
-        mainAddButton.setOnClickListener(view -> mainIpaHandler.selectIpaFile());
+        mainAddButton.setOnClickListener(view -> selectIpaFile());
 
         final Context mainContext = getApplicationContext();
         final RecyclerView.LayoutManager mainCtxListLayout = new LinearLayoutManager(mainContext);
@@ -156,6 +161,23 @@ public class MainActivity extends AppCompatActivity {
 
     public HackLogger getLogger() {
         return mainLogger;
+    }
+
+    public void requestExternalStorage() {
+        Intent openExtProvider = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+
+        openExtProvider.setType("*/*");
+        openExtProvider.addCategory(Intent.ACTION_OPEN_DOCUMENT_TREE);
+
+        getExternalDirectory.launch(openExtProvider);
+    }
+
+    public void selectIpaFile() {
+        Intent openDocumentProvider = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        openDocumentProvider.setType("*/*");
+        openDocumentProvider.addCategory(Intent.CATEGORY_OPENABLE);
+
+        getIpaFromContent.launch(openDocumentProvider);
     }
 
     @Override
@@ -190,7 +212,6 @@ public class MainActivity extends AppCompatActivity {
                 startActivityIfNeeded(accessPermIntent, 1);
             }
         }
-
     }
 
     @Override

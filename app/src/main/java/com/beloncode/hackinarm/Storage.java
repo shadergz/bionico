@@ -1,11 +1,9 @@
 package com.beloncode.hackinarm;
 
 import android.content.ContentValues;
-import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
-import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
 
 import java.io.File;
@@ -26,13 +24,11 @@ public class Storage {
 
     private final StorageDBHelper dbSystemRes;
     private final ExternalDBHelper dbExternRes;
-
-    MainActivity mainContext;
-    ActivityResultLauncher<Intent> selectExternalDir;
+    private final MainActivity mainContext;
 
     private File currentExternalDir;
     private File[] filesList;
-    private final String[] addonRequiredDirs = new String[] {
+    private final String[] addonRequiredDirs = new String[]{
             "Storage", "System"
     };
 
@@ -43,19 +39,18 @@ public class Storage {
                 StoragePathIndexes.STORAGE_EXT_DIR)));
     }
 
-    public Storage(final MainActivity mainActivity, ActivityResultLauncher<Intent> lambOpenExternalDir) throws FileNotFoundException {
+    public Storage(final MainActivity mainActivity) throws FileNotFoundException {
 
         dbSystemRes = new StorageDBHelper(mainActivity.getApplicationContext());
 
         dbSystemR = dbSystemRes.getReadableDatabase();
         dbSystemW = dbSystemRes.getWritableDatabase();
         mainContext = mainActivity;
-        selectExternalDir = lambOpenExternalDir;
 
         assert updateExternalPaths();
 
         if (!isExternalDirDefined()) {
-            requestExternalStorage();
+            mainActivity.requestExternalStorage();
             updateExternalPaths();
         }
 
@@ -71,7 +66,7 @@ public class Storage {
                 queriedPaths.get(getStorageIndex(StoragePathIndexes.STORAGE_EXT_DATABASE_PATH))
         );
 
-        dbExternRes = new ExternalDBHelper(mainActivity, dbAbsolutePath);
+        dbExternRes = new ExternalDBHelper(mainActivity.getApplicationContext(), dbAbsolutePath);
     }
 
     @NonNull
@@ -129,15 +124,6 @@ public class Storage {
                 mainContext.getLogger().releaseMessage(HackLogger.ERROR_LEVEL, errorString, true);
             }
         }
-    }
-
-    void requestExternalStorage() {
-        Intent openExtProvider = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
-
-        openExtProvider.setType("*/*");
-        openExtProvider.addCategory(Intent.CATEGORY_OPENABLE);
-
-        selectExternalDir.launch(openExtProvider);
     }
 
     void saveExternalStoragePath(final String extDirectory) {

@@ -2,10 +2,8 @@ package com.beloncode.hackinarm;
 
 import android.annotation.SuppressLint;
 import android.content.ContentResolver;
-import android.content.Intent;
 import android.os.ParcelFileDescriptor;
 
-import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
 
 import java.io.BufferedInputStream;
@@ -23,22 +21,12 @@ class IpaException extends Exception {
 
 public class IpaHandler {
 
-    MainActivity mainActivity;
-    ActivityResultLauncher<Intent> openNewIpa;
+    private final MainActivity mainActivity;
     private final ArrayList<IpaObject> ipaList;
 
-    IpaHandler(MainActivity activity, ActivityResultLauncher<Intent> lambOpenNewIpa) {
+    IpaHandler(MainActivity activity) {
         ipaList = new ArrayList<>();
         mainActivity = activity;
-        openNewIpa = lambOpenNewIpa;
-    }
-
-    public void selectIpaFile() {
-        Intent openDocumentProvider = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-        openDocumentProvider.setType("*/*");
-        openDocumentProvider.addCategory(Intent.CATEGORY_OPENABLE);
-
-        openNewIpa.launch(openDocumentProvider);
     }
 
     private boolean verifyForIpaOccurrence(final IpaObject ipaObject) {
@@ -141,16 +129,14 @@ public class IpaHandler {
             final FileInputStream fInput = ipaCollected.readableStream;
             ParcelFileDescriptor contextParser = ipaCollected.openableFParser;
 
-            @SuppressLint("DefaultLocale")
-            final String logRela = String.format("Destroying relationship with file descriptor %d",
+            @SuppressLint("DefaultLocale") final String logRela = String.format("Destroying relationship with file descriptor %d",
                     contextParser.getFd());
 
             mainActivity.getLogger().releaseMessage(logRela);
 
             final int objectedDown = engineDownIpa(ipaCollected);
             if (objectedDown != -1) {
-                @SuppressLint("DefaultLocale")
-                final String objReport = String.format("Object with id %d removed", objectedDown);
+                @SuppressLint("DefaultLocale") final String objReport = String.format("Object with id %d removed", objectedDown);
                 mainActivity.getLogger().releaseMessage(objReport);
             }
 
