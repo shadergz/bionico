@@ -12,7 +12,7 @@ public final class AppDBContract {
         public static final String TABLE_STORAGE_NAME = "Storage";
 
         public static final String COL_FILEPATH_EXT_DIR = "External Directory";
-        public static final String COL_FILEPATH_EXT_DB = ExternalDBContract.EXT_DATABASE_FILEPATH;
+        public static final String COL_FILEPATH_EXT_DB = "Database Directory";
         public static final String COL_NAME_EXT_DB_ENCODE = "Encode Type";
         public static final String COL_NAME_EXT_DB_CHECKSUM = "Checksum";
     }

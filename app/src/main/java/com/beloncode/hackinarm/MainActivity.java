@@ -116,7 +116,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         try {
-            mainStorage = new Storage();
+            mainStorage = new Storage(getApplicationContext());
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }

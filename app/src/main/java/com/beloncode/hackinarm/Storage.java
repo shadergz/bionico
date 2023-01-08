@@ -1,6 +1,7 @@
 package com.beloncode.hackinarm;
 
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -33,8 +34,8 @@ public class Storage extends MainActivity {
             "Storage", "System"
     };
 
-    public Storage() throws FileNotFoundException {
-        dbSystemRes = new StorageDBHelper(getApplicationContext());
+    public Storage(final Context mainActivity) throws FileNotFoundException {
+        dbSystemRes = new StorageDBHelper(mainActivity);
         dbSystemR = dbSystemRes.getReadableDatabase();
         dbSystemW = dbSystemRes.getWritableDatabase();
 
