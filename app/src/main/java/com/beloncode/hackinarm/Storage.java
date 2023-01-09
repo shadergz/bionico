@@ -23,7 +23,7 @@ public class Storage {
     private final SQLiteDatabase dbSystemW;
 
     private final StorageDBHelper dbSystemRes;
-    private final ExternalDBHelper dbExternRes;
+    private ExternalDBHelper dbExternRes;
     private final MainActivity mainContext;
 
     private File currentExternalDir;
@@ -39,18 +39,9 @@ public class Storage {
                 StoragePathIndexes.STORAGE_EXT_DIR)));
     }
 
-    public Storage(final MainActivity mainActivity) throws FileNotFoundException {
-
-        dbSystemRes = new StorageDBHelper(mainActivity.getApplicationContext());
-
-        dbSystemR = dbSystemRes.getReadableDatabase();
-        dbSystemW = dbSystemRes.getWritableDatabase();
-        mainContext = mainActivity;
-
-        assert updateExternalPaths();
-
+    public void getExternalStorageAccess() throws FileNotFoundException {
         if (!isExternalDirDefined()) {
-            mainActivity.requestExternalStorage();
+            mainContext.requestExternalStorage();
             updateExternalPaths();
         }
 
@@ -66,7 +57,18 @@ public class Storage {
                 queriedPaths.get(getStorageIndex(StoragePathIndexes.STORAGE_EXT_DATABASE_PATH))
         );
 
-        dbExternRes = new ExternalDBHelper(mainActivity.getApplicationContext(), dbAbsolutePath);
+        dbExternRes = new ExternalDBHelper(mainContext.getApplicationContext(), dbAbsolutePath);
+    }
+
+    public Storage(final MainActivity mainActivity) {
+
+        dbSystemRes = new StorageDBHelper(mainActivity.getApplicationContext());
+
+        dbSystemR = dbSystemRes.getReadableDatabase();
+        dbSystemW = dbSystemRes.getWritableDatabase();
+        mainContext = mainActivity;
+
+        assert updateExternalPaths();
     }
 
     @NonNull

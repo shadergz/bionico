@@ -50,79 +50,86 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        getExternalDirectory = registerForActivityResult(
-                new ActivityResultContracts.StartActivityForResult(), result -> {
-                    if (result.getData() == null || result.getResultCode() != RESULT_OK) {
-                        mainLogger.releaseMessage(HackLogger.ERROR_LEVEL,
-                                "Can't open the desired folder, or no one is specified",
-                                true);
-                        return;
-                    }
-                    Uri fileUri = result.getData().getData();
-
-                    final File directoryHandler = new File(Environment.getExternalStorageDirectory(),
-                            fileUri.getPath());
-
-                    mainStorage.setExternal(directoryHandler);
-
-                    try {
-                        if (!mainStorage.checkoutDirectories(mainStorage.getExternal())) {
-                            // Create all directories if they not exist yet!
-                            mainStorage.createMainDirectories(mainStorage.getExternal());
-                        }
-                    } catch (IOException ioExcept) {
-                        mainLogger.releaseMessage(HackLogger.ERROR_LEVEL, ioExcept.getMessage());
-                        return;
-                    }
-                    mainStorage.saveExternalStoragePath(mainStorage.getExternalPath());
-
-                });
-
-        getIpaFromContent = registerForActivityResult(
-                new ActivityResultContracts.StartActivityForResult(), result -> {
-                    if (result.getData() == null || result.getResultCode() != RESULT_OK) {
-                        final String errorOne = "Can't open the file or no file has been selected";
-                        mainLogger.releaseMessage(HackLogger.ERROR_LEVEL, errorOne, true);
-                        return;
-                    }
-                    Intent ipaIntent = result.getData();
-                    IpaObject newIpaObject = new IpaObject(ipaIntent);
-
-                    final File ipaFile = newIpaObject.getRegularFile();
-
-                    if (!ipaFile.isFile() || !ipaFile.canRead()) {
-                        final String cantRead = String.format("Can't read file (%s), isn't a regular file!",
-                                ipaFile.getAbsolutePath());
-                        mainLogger.releaseMessage(HackLogger.ERROR_LEVEL, cantRead);
-                    }
-
-                    try {
-                        mainIpaHandler.handleNewIpa(newIpaObject);
-                        mainCoreInstaller.installNewIpa(newIpaObject);
-
-                    } catch (IpaException ipaException) {
-                        final String ipaError = String.format("Error occurred while tried to handler a " +
-                                "new Ipa object, with file path: %s", ipaFile.getAbsolutePath());
-                        mainLogger.releaseMessage(HackLogger.ERROR_LEVEL, ipaError);
-                    }
-
-                    mainIpaAdapter.placeNewItem(newIpaObject);
-                    final String toastMessage = String.format("Adding an Ipa package with filename: %s",
-                            newIpaObject.ipaFilename);
-                    mainLogger.releaseMessage(HackLogger.USER_LEVEL, toastMessage, true);
-                });
-
-        engineInitSystem();
-
         ActivityMainBinding binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        setupMainRes();
+        setupActivitiesResults();
+        engineInitSystem();
         mainLogger = new HackLogger(this, HackLogger.DEBUG_LEVEL);
 
         mainIpaHandler = new IpaHandler(this);
         mainCoreInstaller = new IpaInstaller();
 
-        NavigationBarView mainBarView = findViewById(R.id.nav_screen);
+        mainStorage = new Storage(this);
+    }
+
+    private void setupActivitiesResults() {
+        getExternalDirectory = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(), result -> {
+            if (result.getData() == null || result.getResultCode() != RESULT_OK) {
+                mainLogger.releaseMessage(HackLogger.ERROR_LEVEL,
+                        "Can't open the desired folder, or no one is specified", true);
+                return;
+            }
+            Uri fileUri = result.getData().getData();
+
+            final File directoryHandler = new File(Environment.getExternalStorageDirectory(),
+                    fileUri.getPath());
+            mainStorage.setExternal(directoryHandler);
+
+            try {
+                if (!mainStorage.checkoutDirectories(mainStorage.getExternal())) {
+                    // Create all directories if they not exist yet!
+                    mainStorage.createMainDirectories(mainStorage.getExternal());
+                }
+            } catch (final IOException ioExcept) {
+                mainLogger.releaseMessage(HackLogger.ERROR_LEVEL, ioExcept.getMessage());
+                return;
+            }
+            mainStorage.saveExternalStoragePath(mainStorage.getExternalPath());
+        });
+
+        getIpaFromContent = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(), result -> {
+            if (result.getData() == null || result.getResultCode() != RESULT_OK) {
+                final String errorOne = "Can't open the file or no file has been selected";
+                mainLogger.releaseMessage(HackLogger.ERROR_LEVEL, errorOne, true);
+                return;
+            }
+            Intent ipaIntent = result.getData();
+            IpaObject newIpaObject = new IpaObject(ipaIntent);
+
+            final File ipaFile = newIpaObject.getRegularFile();
+
+            if (!ipaFile.isFile() || !ipaFile.canRead()) {
+                final String cantRead = String.format("Can't read file (%s), isn't a regular file!",
+                        ipaFile.getAbsolutePath());
+                mainLogger.releaseMessage(HackLogger.ERROR_LEVEL, cantRead);
+                return;
+            }
+
+            try {
+                mainIpaHandler.handleNewIpa(newIpaObject);
+                mainCoreInstaller.installNewIpa(newIpaObject);
+
+            } catch (IpaException ipaException) {
+                final String ipaError = String.format("Error occurred while tried to handler a " +
+                        "new Ipa object, with file path: %s", ipaFile.getAbsolutePath());
+                mainLogger.releaseMessage(HackLogger.ERROR_LEVEL, ipaError);
+                return;
+            }
+
+            mainIpaAdapter.placeNewItem(newIpaObject);
+            final String toastMessage = String.format("Adding an Ipa package with filename: %s",
+                    newIpaObject.ipaFilename);
+            mainLogger.releaseMessage(HackLogger.USER_LEVEL, toastMessage, true);
+        });
+    }
+
+    private void setupMainRes() {
+
+        final NavigationBarView mainBarView = findViewById(R.id.nav_screen);
         mainBarView.setOnItemSelectedListener(item -> {
             if (item.getItemId() == R.id.view_button) {
                 Drawable listIcon = ResourcesCompat.getDrawable(getResources(), viewerList,
@@ -139,13 +146,6 @@ public class MainActivity extends AppCompatActivity {
             }
             return true;
         });
-
-        try {
-            mainStorage = new Storage(this);
-        } catch (FileNotFoundException eFileNotFound) {
-            mainLogger.releaseMessage(HackLogger.ERROR_LEVEL, eFileNotFound.getMessage());
-            eFileNotFound.printStackTrace();
-        }
 
         final FloatingActionButton mainAddButton = findViewById(R.id.add_button);
         mainAddButton.setOnClickListener(view -> selectIpaFile());
@@ -164,10 +164,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void requestExternalStorage() {
-        Intent openExtProvider = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-
-        openExtProvider.setType("*/*");
-        openExtProvider.addCategory(Intent.ACTION_OPEN_DOCUMENT_TREE);
+        Intent openExtProvider = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
 
         getExternalDirectory.launch(openExtProvider);
     }
@@ -180,19 +177,7 @@ public class MainActivity extends AppCompatActivity {
         getIpaFromContent.launch(openDocumentProvider);
     }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        enginePause();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        engineResume();
-
-        /* Requesting the permissions needed by the simulator */
+    public void acquireStorageAccessPolicy() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
             final String readExtPer = Manifest.permission.READ_EXTERNAL_STORAGE;
             final String writeExtPer = Manifest.permission.WRITE_EXTERNAL_STORAGE;
@@ -212,6 +197,26 @@ public class MainActivity extends AppCompatActivity {
                 startActivityIfNeeded(accessPermIntent, 1);
             }
         }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        enginePause();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        engineResume();
+        /* Requesting the permissions needed by the simulator */
+        acquireStorageAccessPolicy();
+        try {
+            mainStorage.getExternalStorageAccess();
+        } catch (FileNotFoundException fileNotExcept) {
+            fileNotExcept.printStackTrace();
+        }
+
     }
 
     @Override
