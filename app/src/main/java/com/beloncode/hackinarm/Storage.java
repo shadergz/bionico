@@ -3,11 +3,12 @@ package com.beloncode.hackinarm;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
+import android.os.Environment;
 
 import androidx.annotation.NonNull;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -39,17 +40,13 @@ public class Storage {
                 StoragePathIndexes.STORAGE_EXT_DIR)));
     }
 
-    public void getExternalStorageAccess() throws FileNotFoundException {
-        if (!isExternalDirDefined()) {
-            mainContext.requestExternalStorage();
-            updateExternalPaths();
-        }
+    public void setupExternalStorage() {
 
         if (!currentExternalDir.exists()) {
             final String errorProblem = String.format("Can't read the main external directory in %s",
                     currentExternalDir.getAbsolutePath());
             mainContext.getLogger().releaseMessage(HackLogger.ERROR_LEVEL, errorProblem, true);
-            throw new FileNotFoundException();
+            return;
         }
 
         final String dbAbsolutePath = String.format("%s/%s",
@@ -58,6 +55,13 @@ public class Storage {
         );
 
         dbExternRes = new ExternalDBHelper(mainContext.getApplicationContext(), dbAbsolutePath);
+    }
+
+    public void getExternalStorageAccess() {
+        if (!isExternalDirDefined()) {
+            mainContext.requestExternalStorage();
+            updateExternalPaths();
+        }
     }
 
     public Storage(final MainActivity mainActivity) {
@@ -80,13 +84,17 @@ public class Storage {
         return currentExternalDir;
     }
 
-    public void setExternal(@NonNull final File newExtDir) {
-        if (!newExtDir.exists() && newExtDir.isFile()) return;
-        currentExternalDir = newExtDir;
+    public void setExternal(@NonNull final Uri newExtDir) {
+
+        final StorageResolver resolver = new StorageResolver(mainContext);
+        String dirPathname = resolver.getFilePathUri(newExtDir);
+
+        currentExternalDir = new File(
+                Environment.getExternalStorageDirectory(), dirPathname);
     }
 
     boolean checkoutDirectories(File extDir) throws IOException {
-        if (extDir.exists()) return false;
+        if (!extDir.exists() || extDir.isFile()) return false;
 
         filesList = extDir.listFiles();
         if (filesList == null) return false;

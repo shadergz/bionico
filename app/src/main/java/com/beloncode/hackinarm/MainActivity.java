@@ -26,9 +26,7 @@ import com.beloncode.hackinarm.databinding.ActivityMainBinding;
 import com.beloncode.hackinarm.ipa.IpaInstaller;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationBarView;
-
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity {
@@ -72,11 +70,8 @@ public class MainActivity extends AppCompatActivity {
                         "Can't open the desired folder, or no one is specified", true);
                 return;
             }
-            Uri fileUri = result.getData().getData();
-
-            final File directoryHandler = new File(Environment.getExternalStorageDirectory(),
-                    fileUri.getPath());
-            mainStorage.setExternal(directoryHandler);
+            Uri dirUri = result.getData().getData();
+            mainStorage.setExternal(dirUri);
 
             try {
                 if (!mainStorage.checkoutDirectories(mainStorage.getExternal())) {
@@ -88,6 +83,7 @@ public class MainActivity extends AppCompatActivity {
                 return;
             }
             mainStorage.saveExternalStoragePath(mainStorage.getExternalPath());
+            mainStorage.setupExternalStorage();
         });
 
         getIpaFromContent = registerForActivityResult(
@@ -211,11 +207,7 @@ public class MainActivity extends AppCompatActivity {
         engineResume();
         /* Requesting the permissions needed by the simulator */
         acquireStorageAccessPolicy();
-        try {
-            mainStorage.getExternalStorageAccess();
-        } catch (FileNotFoundException fileNotExcept) {
-            fileNotExcept.printStackTrace();
-        }
+        mainStorage.getExternalStorageAccess();
 
     }
 
