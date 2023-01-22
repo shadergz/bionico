@@ -1,4 +1,4 @@
-package com.beloncode.hackinarm;
+package com.beloncode.akane;
 
 import android.content.ContentValues;
 import android.database.Cursor;
@@ -45,7 +45,7 @@ public class Storage {
         if (!currentExternalDir.exists()) {
             final String errorProblem = String.format("Can't read the main external directory in %s",
                     currentExternalDir.getAbsolutePath());
-            mainContext.getLogger().releaseMessage(HackLogger.ERROR_LEVEL, errorProblem, true);
+            mainContext.getLogger().releaseMessage(FrontLogger.ERROR_LEVEL, errorProblem, true);
             return;
         }
 
@@ -131,7 +131,7 @@ public class Storage {
             if (!mkDirResult) {
                 final String errorString = String.format("Can't create a directory called: " +
                         "%s, as a subdirectory of %s", regFolder, folder.getAbsolutePath());
-                mainContext.getLogger().releaseMessage(HackLogger.ERROR_LEVEL, errorString, true);
+                mainContext.getLogger().releaseMessage(FrontLogger.ERROR_LEVEL, errorString, true);
             }
         }
     }

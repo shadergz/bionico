@@ -1,4 +1,4 @@
-package com.beloncode.hackinarm;
+package com.beloncode.akane;
 
 import android.provider.BaseColumns;
 

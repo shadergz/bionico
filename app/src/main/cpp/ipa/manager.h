@@ -3,7 +3,7 @@
 #include <vector>
 #include <ipa/format.h>
 
-namespace hackback::ipa {
+namespace akane::ipa {
     class IpaManager {
     public:
         IpaManager() = default;

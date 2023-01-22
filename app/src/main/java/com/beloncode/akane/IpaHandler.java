@@ -1,4 +1,4 @@
-package com.beloncode.hackinarm;
+package com.beloncode.akane;
 
 import android.annotation.SuppressLint;
 import android.content.ContentResolver;
@@ -41,7 +41,7 @@ public class IpaHandler {
             final String errorStr = String.format("Object with Uri %s already is inside our list!",
                     ipaObject.ipaUri.toString());
 
-            mainActivity.getLogger().releaseMessage(HackLogger.ERROR_LEVEL, errorStr, true);
+            mainActivity.getLogger().releaseMessage(FrontLogger.ERROR_LEVEL, errorStr, true);
             return;
         }
         final ContentResolver fMainResolver = mainActivity.getContentResolver();
@@ -63,7 +63,7 @@ public class IpaHandler {
             }
 
             if (!testIpaStreaming(ipaObject)) {
-                mainActivity.getLogger().releaseMessage(HackLogger.ERROR_LEVEL,
+                mainActivity.getLogger().releaseMessage(FrontLogger.ERROR_LEVEL,
                         "Can't add the new ipa inside the list", false);
             }
         } catch (IOException ioExcept) {
@@ -105,7 +105,7 @@ public class IpaHandler {
             }
 
             if (!fastIpaFileValidation(localBuffer) && !checkFileExtensionWithMime(ipaObject)) {
-                mainActivity.getLogger().releaseMessage(HackLogger.ERROR_LEVEL,
+                mainActivity.getLogger().releaseMessage(FrontLogger.ERROR_LEVEL,
                         "None a Ipa file, or may the file is corrupted!", true);
                 return false;
             }

@@ -5,13 +5,13 @@
 #include <memory>
 #include <common/references.h>
 
-namespace hackback::ipa {
+namespace akane::ipa {
     class IpaManager;
 
     class IpaManager;
 }
 
-namespace hackback {
+namespace akane {
     class SlayerLogger;
 
     using namespace common;

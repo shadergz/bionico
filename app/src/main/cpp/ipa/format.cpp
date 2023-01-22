@@ -3,7 +3,7 @@
 #include <ipa/format.h>
 #include <unistd.h>
 
-namespace hackback::ipa {
+namespace akane::ipa {
 
     detailed_format::detailed_format(RawPointer<JNIEnv *> actual_env,
                                      RawPointer<jclass> parent_clazz,

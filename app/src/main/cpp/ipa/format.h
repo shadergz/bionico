@@ -8,7 +8,7 @@
 #include <slayer_logger.h>
 #include <runtime_resources.h>
 
-namespace hackback::ipa {
+namespace akane::ipa {
     using namespace common;
 
     class detailed_format {

@@ -1,7 +1,7 @@
-package com.beloncode.hackinarm.ipa;
+package com.beloncode.akane.ipa;
 
 
-import com.beloncode.hackinarm.IpaObject;
+import com.beloncode.akane.IpaObject;
 
 public class IpaInstaller {
     public IpaInstaller() {

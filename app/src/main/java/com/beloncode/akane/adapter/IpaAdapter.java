@@ -1,4 +1,4 @@
-package com.beloncode.hackinarm.adapter;
+package com.beloncode.akane.adapter;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -9,8 +9,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.beloncode.hackinarm.IpaObject;
-import com.beloncode.hackinarm.R;
+import com.beloncode.akane.IpaObject;
+import com.beloncode.akane.R;
 
 import java.util.Vector;
 

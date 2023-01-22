@@ -6,9 +6,9 @@
 #include <fmt/format.h>
 #include <fmt/color.h>
 
-static constexpr std::string_view gs_backend_tag = "HackinARM backend";
+static constexpr std::string_view gs_backend_tag = "Akane:backend";
 
-namespace hackback {
+namespace akane {
     class SlayerLogger {
     public:
         template<typename... Args>

@@ -26,12 +26,12 @@ public:
         {{"HelioG96", SOCVendor::SOC_MEDIATEK},   01}
 };
 
-#define HACKBACK_EXPORT extern "C" JNIEXPORT
+#define AKANE_EXPORT extern "C" JNIEXPORT
 
-namespace hackback {
+namespace akane {
     using namespace common;
 
-    HACKBACK_EXPORT jboolean JNICALL Java_com_beloncode_hackinarm_MainActivity_engineInitSystem
+    AKANE_EXPORT jboolean JNICALL Java_com_beloncode_akane_MainActivity_engineInitSystem
             (JNIEnv *env, jobject thiz) {
         g_env.assign(env);
         g_main_class.assign(thiz);
@@ -45,24 +45,24 @@ namespace hackback {
 
         return true;
     }
-    HACKBACK_EXPORT jboolean JNICALL Java_com_beloncode_hackinarm_MainActivity_enginePause
+    AKANE_EXPORT jboolean JNICALL Java_com_beloncode_akane_MainActivity_enginePause
             (JNIEnv *env, jobject thiz) {
         check_jni_params(env, thiz);
         return true;
     }
-    HACKBACK_EXPORT jboolean JNICALL Java_com_beloncode_hackinarm_MainActivity_engineResume
+    AKANE_EXPORT jboolean JNICALL Java_com_beloncode_akane_MainActivity_engineResume
             (JNIEnv *env, jobject thiz) {
         check_jni_params(env, thiz);
         return true;
     }
-    HACKBACK_EXPORT jboolean JNICALL Java_com_beloncode_hackinarm_MainActivity_engineDestroy
+    AKANE_EXPORT jboolean JNICALL Java_com_beloncode_akane_MainActivity_engineDestroy
             (JNIEnv *env, jobject thiz) {
         check_jni_params(env, thiz);
         return true;
     }
 
-    HACKBACK_EXPORT jint JNICALL
-    Java_com_beloncode_hackinarm_IpaHandler_engineCtrlIpa(JNIEnv *env, jclass clazz, jobject file_descriptor) {
+    AKANE_EXPORT jint JNICALL
+    Java_com_beloncode_akane_IpaHandler_engineCtrlIpa(JNIEnv *env, jclass clazz, jobject file_descriptor) {
         check_jni_params(env, clazz);
 
         auto ipa_object = std::make_shared<ipa::detailed_format>(env, clazz,
@@ -70,8 +70,8 @@ namespace hackback {
         g_main_ipa_mgr->manager_new_ipa(ipa_object);
         return g_main_ipa_mgr->find_ipa_index(ipa_object);
     }
-    HACKBACK_EXPORT jint JNICALL
-    Java_com_beloncode_hackinarm_IpaHandler_engineDownIpa(JNIEnv *env, jclass clazz,
+    AKANE_EXPORT jint JNICALL
+    Java_com_beloncode_akane_IpaHandler_engineDownIpa(JNIEnv *env, jclass clazz,
                                                           jobject ipa_item) {
         check_jni_params(env, clazz);
 

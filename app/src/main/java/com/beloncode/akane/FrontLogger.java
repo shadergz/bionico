@@ -1,9 +1,9 @@
-package com.beloncode.hackinarm;
+package com.beloncode.akane;
 
 import android.util.Log;
 import android.widget.Toast;
 
-public class HackLogger {
+public class FrontLogger {
 
     public final static int DEBUG_LEVEL = 0;
     public final static int VERBOSE_LEVEL = 1;
@@ -15,12 +15,12 @@ public class HackLogger {
     private final int defLogMax;
     private final MainActivity mainActivity;
 
-    HackLogger(MainActivity activity, int defaultLog) {
+    FrontLogger(MainActivity activity, int defaultLog) {
         mainActivity = activity;
         defLogMax = defaultLog;
     }
 
-    static String loggerTag = "HackinARM frontend";
+    static String loggerTag = "Akane:frontend";
 
     void detachMessage(final int logging, final String frontMsg, boolean adviseUser) {
         switch (logging) {

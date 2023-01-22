@@ -1,4 +1,4 @@
-package com.beloncode.hackinarm;
+package com.beloncode.akane;
 
 import android.Manifest;
 import android.content.Context;
@@ -21,9 +21,9 @@ import androidx.core.content.res.ResourcesCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.beloncode.hackinarm.adapter.IpaAdapter;
-import com.beloncode.hackinarm.databinding.ActivityMainBinding;
-import com.beloncode.hackinarm.ipa.IpaInstaller;
+import com.beloncode.akane.adapter.IpaAdapter;
+import com.beloncode.akane.databinding.ActivityMainBinding;
+import com.beloncode.akane.ipa.IpaInstaller;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationBarView;
 import java.io.File;
@@ -34,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
     private final int gridList = R.drawable.ic_baseline_grid_view_24;
 
     private int listIcon = viewerList;
-    private HackLogger mainLogger = null;
+    private FrontLogger mainLogger = null;
     private IpaInstaller mainCoreInstaller = null;
     private IpaHandler mainIpaHandler = null;
     private IpaAdapter mainIpaAdapter = null;
@@ -54,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
         setupMainRes();
         setupActivitiesResults();
         engineInitSystem();
-        mainLogger = new HackLogger(this, HackLogger.DEBUG_LEVEL);
+        mainLogger = new FrontLogger(this, FrontLogger.DEBUG_LEVEL);
 
         mainIpaHandler = new IpaHandler(this);
         mainCoreInstaller = new IpaInstaller();
@@ -66,7 +66,7 @@ public class MainActivity extends AppCompatActivity {
         getExternalDirectory = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(), result -> {
             if (result.getData() == null || result.getResultCode() != RESULT_OK) {
-                mainLogger.releaseMessage(HackLogger.ERROR_LEVEL,
+                mainLogger.releaseMessage(FrontLogger.ERROR_LEVEL,
                         "Can't open the desired folder, or no one is specified", true);
                 return;
             }
@@ -79,7 +79,7 @@ public class MainActivity extends AppCompatActivity {
                     mainStorage.createMainDirectories(mainStorage.getExternal());
                 }
             } catch (final IOException ioExcept) {
-                mainLogger.releaseMessage(HackLogger.ERROR_LEVEL, ioExcept.getMessage());
+                mainLogger.releaseMessage(FrontLogger.ERROR_LEVEL, ioExcept.getMessage());
                 return;
             }
             mainStorage.saveExternalStoragePath(mainStorage.getExternalPath());
@@ -90,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
                 new ActivityResultContracts.StartActivityForResult(), result -> {
             if (result.getData() == null || result.getResultCode() != RESULT_OK) {
                 final String errorOne = "Can't open the file or no file has been selected";
-                mainLogger.releaseMessage(HackLogger.ERROR_LEVEL, errorOne, true);
+                mainLogger.releaseMessage(FrontLogger.ERROR_LEVEL, errorOne, true);
                 return;
             }
             Intent ipaIntent = result.getData();
@@ -101,7 +101,7 @@ public class MainActivity extends AppCompatActivity {
             if (!ipaFile.isFile() || !ipaFile.canRead()) {
                 final String cantRead = String.format("Can't read file (%s), isn't a regular file!",
                         ipaFile.getAbsolutePath());
-                mainLogger.releaseMessage(HackLogger.ERROR_LEVEL, cantRead);
+                mainLogger.releaseMessage(FrontLogger.ERROR_LEVEL, cantRead);
                 return;
             }
 
@@ -112,14 +112,14 @@ public class MainActivity extends AppCompatActivity {
             } catch (IpaException ipaException) {
                 final String ipaError = String.format("Error occurred while tried to handler a " +
                         "new Ipa object, with file path: %s", ipaFile.getAbsolutePath());
-                mainLogger.releaseMessage(HackLogger.ERROR_LEVEL, ipaError);
+                mainLogger.releaseMessage(FrontLogger.ERROR_LEVEL, ipaError);
                 return;
             }
 
             mainIpaAdapter.placeNewItem(newIpaObject);
             final String toastMessage = String.format("Adding an Ipa package with filename: %s",
                     newIpaObject.ipaFilename);
-            mainLogger.releaseMessage(HackLogger.USER_LEVEL, toastMessage, true);
+            mainLogger.releaseMessage(FrontLogger.USER_LEVEL, toastMessage, true);
         });
     }
 
@@ -155,7 +155,7 @@ public class MainActivity extends AppCompatActivity {
         mainIpaList.setAdapter(mainIpaAdapter);
     }
 
-    public HackLogger getLogger() {
+    public FrontLogger getLogger() {
         return mainLogger;
     }
 
@@ -224,7 +224,7 @@ public class MainActivity extends AppCompatActivity {
             // Destroying all IO controllable resources
             mainIpaHandler.invalidateAllResources();
         } catch (IpaException ipaException) {
-            mainLogger.releaseMessage(HackLogger.ERROR_LEVEL, ipaException.getMessage());
+            mainLogger.releaseMessage(FrontLogger.ERROR_LEVEL, ipaException.getMessage());
         }
     }
 
@@ -237,7 +237,7 @@ public class MainActivity extends AppCompatActivity {
     public native boolean engineDestroy();
 
     static {
-        System.loadLibrary("hackback");
+        System.loadLibrary("akane");
     }
 
 }

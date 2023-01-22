@@ -2,7 +2,7 @@
 
 #include <cassert>
 
-namespace hackback::common {
+namespace akane::common {
 
     template<typename T>
     class RawPointer {
