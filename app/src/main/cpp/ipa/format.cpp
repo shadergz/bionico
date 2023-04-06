@@ -3,23 +3,23 @@
 #include <ipa/format.h>
 #include <unistd.h>
 
-namespace akane::ipa {
+namespace bionic::ipa {
 
-    detailed_format::detailed_format(RawPointer<JNIEnv *> actual_env,
-                                     RawPointer<jclass> parent_clazz,
-                                     RawPointer<jobject> ipa_jni_object) {
+    DetailedFormat::DetailedFormat(RawPointer<JNIEnv *> actual_env,
+                                   RawPointer<jclass> parent_clazz,
+                                   RawPointer<jobject> ipa_jni_object) {
 
-        m_env.assign(actual_env);
-        m_parent_class.assign(parent_clazz);
-        m_ipa_clazz.assign(actual_env->GetObjectClass(ipa_jni_object.get()));
+        mEnv.assign(actual_env);
+        mParentClass.assign(parent_clazz);
+        mIpaClazz.assign(actual_env->GetObjectClass(ipa_jni_object.get()));
 
         RawPointer<jfieldID> file_descriptor_id = actual_env->GetFieldID(
-                m_ipa_clazz.get(), "fDescriptor", "Landroid/os/ParcelFileDescriptor;");
+                mIpaClazz.get(), "fDescriptor", "Landroid/os/ParcelFileDescriptor;");
         RawPointer<jobject> file_descriptor_object = actual_env->GetObjectField(
                 ipa_jni_object.get(), file_descriptor_id.get());
 
-        if (!file_descriptor_object.is_valid()) {
-            g_logger->back_echo("Can't found Ipa file descriptor 'fDescriptor' field\n");
+        if (!file_descriptor_object.isValid()) {
+            gLogger->backEcho("Can't found Ipa file descriptor 'fDescriptor' field\n");
             return;
         }
 
@@ -28,25 +28,25 @@ namespace akane::ipa {
         RawPointer<jmethodID> get_file_method = actual_env->GetMethodID(
                 fd_parser_class.get(), "getFd", "()I");
 
-        m_fd_access = actual_env->CallIntMethod(
+        mFdAccess = actual_env->CallIntMethod(
                 file_descriptor_object.get(), get_file_method.get());
 
         actual_env->DeleteLocalRef(fd_parser_class.get());
-        if (m_fd_access <= 0) {
-            g_logger->back_echo("Can't fetch an real file descriptor for item: {}\n",
-                                static_cast<void *>(ipa_jni_object.get()));
+        if (mFdAccess <= 0) {
+            gLogger->backEcho("Can't fetch an real file descriptor for item: {}\n",
+                              static_cast<void *>(ipa_jni_object.get()));
             return;
         }
 
-        g_logger->back_echo("fDescriptor for {}: {}\n",
-                            static_cast<void *>(ipa_jni_object.get()), m_fd_access);
+        gLogger->backEcho("fDescriptor for {}: {}\n",
+                          static_cast<void *>(ipa_jni_object.get()), mFdAccess);
 
-        fetch_storage_filename();
+        fetchStorageFilename();
     }
 
-    bool detailed_format::fetch_storage_filename() {
+    bool DetailedFormat::fetchStorageFilename() {
 
-        if (!m_ipa_filename->empty()) return false;
+        if (!mIpaFilename->empty()) return false;
 
         constexpr uint STORAGE_ACCESS_SZ = 0x20;
         constexpr uint FILENAME_BUFFER_SZ = 0x65;
@@ -55,16 +55,16 @@ namespace akane::ipa {
         char filename_buffer[FILENAME_BUFFER_SZ];
 
         snprintf(storage_access_path, sizeof(storage_access_path),
-                 "/proc/self/fd/%d", m_fd_access);
+                 "/proc/self/fd/%d", mFdAccess);
         const auto read_ret = readlink(storage_access_path, filename_buffer,
                                        sizeof(filename_buffer));
         (read_ret)[filename_buffer] = '\0';
 
-        m_ipa_filename = std::make_unique<std::string>(filename_buffer);
+        mIpaFilename = std::make_unique<std::string>(filename_buffer);
 
-        g_logger->back_echo("Real storage absolute filepath for {} fd: {}\n", m_fd_access,
-                            filename_buffer);
-        return read_ret != 0;
+        gLogger->backEcho("Real storage absolute filepath for {} fd: {}\n", mFdAccess,
+                          filename_buffer);
+        return true;
     }
 
 }

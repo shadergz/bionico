@@ -1,4 +1,4 @@
-package com.beloncode.akane;
+package com.beloncode.bionico;
 
 import android.annotation.SuppressLint;
 import android.content.ContentResolver;

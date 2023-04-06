@@ -1,4 +1,4 @@
-package com.beloncode.akane;
+package com.beloncode.bionico;
 
 import android.Manifest;
 import android.content.Context;
@@ -21,9 +21,9 @@ import androidx.core.content.res.ResourcesCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.beloncode.akane.adapter.IpaAdapter;
-import com.beloncode.akane.databinding.ActivityMainBinding;
-import com.beloncode.akane.ipa.IpaInstaller;
+import com.beloncode.bionico.adapter.IpaAdapter;
+import com.beloncode.bionico.databinding.ActivityMainBinding;
+import com.beloncode.bionico.ipa.IpaInstaller;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationBarView;
 import java.io.File;
@@ -237,7 +237,7 @@ public class MainActivity extends AppCompatActivity {
     public native boolean engineDestroy();
 
     static {
-        System.loadLibrary("akane");
+        System.loadLibrary("biocore");
     }
 
 }

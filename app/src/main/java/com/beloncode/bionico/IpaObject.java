@@ -1,4 +1,4 @@
-package com.beloncode.akane;
+package com.beloncode.bionico;
 
 import android.content.Intent;
 import android.net.Uri;

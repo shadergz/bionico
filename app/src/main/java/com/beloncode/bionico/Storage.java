@@ -1,4 +1,4 @@
-package com.beloncode.akane;
+package com.beloncode.bionico;
 
 import android.content.ContentValues;
 import android.database.Cursor;
@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Vector;
 
@@ -105,7 +106,7 @@ public class Storage {
             filesPathname.add(fileItem.getCanonicalPath());
         }
 
-        return filesPathname.containsAll(Arrays.asList(addonRequiredDirs));
+        return new HashSet<>(filesPathname).containsAll(Arrays.asList(addonRequiredDirs));
     }
 
     void createMainDirectories(File currentExternalDir) throws IOException {

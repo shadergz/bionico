@@ -1,3 +1,3 @@
-[submodule "app/src/main/cpp/deps/fmt"]
-	path = app/src/main/cpp/deps/fmt
+[submodule "app/src/main/cpp/vendor/fmt"]
+	path = app/src/main/cpp/vendor/fmt
 	url = https://github.com/fmtlib/fmt.git

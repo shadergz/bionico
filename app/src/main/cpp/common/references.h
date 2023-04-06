@@ -2,17 +2,17 @@
 
 #include <cassert>
 
-namespace akane::common {
+namespace bionic::common {
 
     template<typename T>
     class RawPointer {
     public:
         RawPointer<T>() {
-            check_size();
+            checkSize();
         }
 
         inline RawPointer<T>(const T reference) : m_reference(reference) {
-            check_size();
+            checkSize();
         }
 
         inline auto get() const {
@@ -25,22 +25,22 @@ namespace akane::common {
         }
         */
 
-        inline bool is_valid() const {
+        inline bool isValid() const {
             return m_reference != nullptr;
         }
 
         inline void assign(const T reference) {
-            trap_invalid();
+            trapInvalid();
             m_reference = reference;
         }
 
         [[maybe_unused]] inline void assign(const RawPointer<T> &other_raw) {
-            trap_invalid();
+            trapInvalid();
             m_reference = other_raw.get();
         }
 
-        inline void trap_invalid() {
-            if (is_valid()) {
+        inline void trapInvalid() {
+            if (isValid()) {
                 assert("A pointer already exist inside the container" == nullptr);
             }
         }
@@ -50,9 +50,9 @@ namespace akane::common {
         }
 
     private:
-        void inline check_size() const {
+        void inline checkSize() const {
             if (sizeof(T) != 8) {
-                assert("Type must be a raw C pointer" == NULL);
+                assert("Type must be a raw C pointer" == nullptr);
             }
         }
 

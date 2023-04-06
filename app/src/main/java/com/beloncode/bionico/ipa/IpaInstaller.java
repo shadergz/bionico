@@ -1,7 +1,7 @@
-package com.beloncode.akane.ipa;
+package com.beloncode.bionico.ipa;
 
 
-import com.beloncode.akane.IpaObject;
+import com.beloncode.bionico.IpaObject;
 
 public class IpaInstaller {
     public IpaInstaller() {

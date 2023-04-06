@@ -8,32 +8,32 @@
 #include <slayer_logger.h>
 #include <runtime_resources.h>
 
-namespace akane::ipa {
+namespace bionic::ipa {
     using namespace common;
 
-    class detailed_format {
+    class DetailedFormat {
     public:
-        detailed_format(RawPointer<JNIEnv *> actual_env, RawPointer<jclass> parent_clazz,
-                        RawPointer<jobject> ipa_jni_object);
+        DetailedFormat(RawPointer<JNIEnv *> actual_env, RawPointer<jclass> parent_clazz,
+                       RawPointer<jobject> ipa_jni_object);
 
-        ~detailed_format() {
-            m_env->DeleteLocalRef(m_ipa_clazz.get());
+        ~DetailedFormat() {
+            mEnv->DeleteLocalRef(mIpaClazz.get());
         }
 
-        bool is_fd_valid() const {
-            return m_fd_access > 0;
+        bool isFdValid() const {
+            return mFdAccess > 0;
         }
 
-        bool fetch_storage_filename();
+        bool fetchStorageFilename();
 
-        std::unique_ptr<std::string> m_ipa_filename;
-        int m_fd_access{};
+        std::unique_ptr<std::string> mIpaFilename;
+        int mFdAccess{};
 
-        RawPointer<jclass> m_ipa_clazz{};
-        RawPointer<jclass> m_parent_class{};
-        RawPointer<JNIEnv *> m_env{};
+        RawPointer<jclass> mIpaClazz{};
+        RawPointer<jclass> mParentClass{};
+        RawPointer<JNIEnv *> mEnv{};
     };
 
-    using ipa_object = std::shared_ptr<detailed_format>;
+    using ipa_object = std::shared_ptr<DetailedFormat>;
 }
 

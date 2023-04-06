@@ -1,4 +1,4 @@
-package com.beloncode.akane;
+package com.beloncode.bionico;
 
 import android.util.Log;
 import android.widget.Toast;
@@ -20,7 +20,7 @@ public class FrontLogger {
         defLogMax = defaultLog;
     }
 
-    static String loggerTag = "Akane:frontend";
+    static String loggerTag = "Bionico";
 
     void detachMessage(final int logging, final String frontMsg, boolean adviseUser) {
         switch (logging) {
