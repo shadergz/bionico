@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Vector;
@@ -20,9 +21,8 @@ public class Storage {
 
     // Saving non dynamic resources values, so on we can avoid queries call and work as
     // ahead of time!
-    ArrayList<String> queriedPaths = new ArrayList<>();
-    private final SQLiteDatabase dbSystemR;
-    private final SQLiteDatabase dbSystemW;
+    Map<Integer, String> queriedPaths = new HashMap<>();
+    private final SQLiteDatabase dBUserSystem;
 
     private final StorageDBHelper dbSystemRes;
     private ExternalDBHelper dbExternRes;
@@ -61,7 +61,6 @@ public class Storage {
     public void getExternalStorageAccess() {
         if (!isExternalDirDefined()) {
             mainContext.requestExternalStorage();
-            updateExternalPaths();
         }
     }
 
@@ -69,8 +68,7 @@ public class Storage {
 
         dbSystemRes = new StorageDBHelper(mainActivity.getApplicationContext());
 
-        dbSystemR = dbSystemRes.getReadableDatabase();
-        dbSystemW = dbSystemRes.getWritableDatabase();
+        dBUserSystem = dbSystemRes.getWritableDatabase();
         mainContext = mainActivity;
 
         assert updateExternalPaths();
@@ -88,7 +86,7 @@ public class Storage {
     public void setExternal(@NonNull final Uri newExtDir) {
 
         final StorageResolver resolver = new StorageResolver(mainContext);
-        String dirPathname = resolver.getFilePathUri(newExtDir);
+        String dirPathname = resolver.getPathFromUri(newExtDir);
 
         currentExternalDir = new File(
                 Environment.getExternalStorageDirectory(), dirPathname);
@@ -153,8 +151,7 @@ public class Storage {
     }
 
     public void release() {
-        if (dbSystemR.isOpen()) dbSystemR.close();
-        if (dbSystemW.isOpen()) dbSystemW.close();
+        if (dBUserSystem.isOpen()) dBUserSystem.close();
 
         dbSystemRes.close();
         dbExternRes.close();
