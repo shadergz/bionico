@@ -143,11 +143,12 @@ public class Storage {
 
         final String clause = String.format("%s = ?",
                 AppDBContract.StorageContent.COL_FILEPATH_EXT_DIR);
-        // We must ensure that the External Storage will change only once, instead of multiple
-        // times!
-        final String[] emptyParameter = new String[]{""};
-        dbSystemW.update(AppDBContract.StorageContent.TABLE_STORAGE_NAME, externalDir,
+        // We must ensure that the External Storage will change only once, instead of multiple times!
+        final String[] emptyParameter = new String[]{ extCol };
+        dBUserSystem.update(AppDBContract.StorageContent.TABLE_STORAGE_NAME, externalDir,
                 clause, emptyParameter);
+
+        updateExternalPaths();
     }
 
     public void release() {
@@ -176,15 +177,21 @@ public class Storage {
         final String targetTable = AppDBContract.StorageContent.TABLE_STORAGE_NAME;
 
         final String[] columnName = new String[]{filepathDir, dbPathDir};
-        Cursor tableCursor = dbSystemR.query(targetTable, columnName,
+        Cursor tableCursor = dBUserSystem.query(targetTable, columnName,
                 "_id = ?", firstRow, null, null, null);
         if (tableCursor == null) return false;
 
         try {
             tableCursor.moveToNext();
 
-            queriedPaths.add(tableCursor.getString(tableCursor.getColumnIndexOrThrow(filepathDir)));
-            queriedPaths.add(tableCursor.getString(tableCursor.getColumnIndexOrThrow(dbPathDir)));
+            final int dirPathCI = tableCursor.getColumnIndexOrThrow(filepathDir);
+            final int dirDbCI = tableCursor.getColumnIndexOrThrow(dbPathDir);
+
+            final int dirPathIndex = StoragePathIndexes.STORAGE_EXT_DIR.ordinal();
+            final int dirDbIndex = StoragePathIndexes.STORAGE_EXT_DATABASE_PATH.ordinal();
+
+            queriedPaths.put (dirPathIndex, tableCursor.getString(dirPathCI));
+            queriedPaths.put (dirDbIndex, tableCursor.getString(dirDbCI));
         } finally {
             tableCursor.close();
         }

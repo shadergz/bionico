@@ -75,15 +75,18 @@ public class MainActivity extends AppCompatActivity {
 
             try {
                 if (!mainStorage.checkoutDirectories(mainStorage.getExternal())) {
-                    // Create all directories if they not exist yet!
+                    // Creates all directories if they not exist yet!
                     mainStorage.createMainDirectories(mainStorage.getExternal());
                 }
             } catch (final IOException ioExcept) {
                 mainLogger.releaseMessage(FrontLogger.ERROR_LEVEL, ioExcept.getMessage());
                 return;
             }
+            // Updating our external path reference inside of the system database
             mainStorage.saveExternalStoragePath(mainStorage.getExternalPath());
             mainStorage.setupExternalStorage();
+
+
         });
 
         getIpaFromContent = registerForActivityResult(
