@@ -144,7 +144,7 @@ public class Storage {
         final String clause = String.format("%s = ?",
                 AppDBContract.StorageContent.COL_FILEPATH_EXT_DIR);
         // We must ensure that the External Storage will change only once, instead of multiple times!
-        final String[] emptyParameter = new String[]{ extCol };
+        final String[] emptyParameter = new String[]{ "Undefined" };
         dBUserSystem.update(AppDBContract.StorageContent.TABLE_STORAGE_NAME, externalDir,
                 clause, emptyParameter);
 

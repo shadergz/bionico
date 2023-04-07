@@ -24,7 +24,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.beloncode.bionico.adapter.IpaAdapter;
 import com.beloncode.bionico.databinding.ActivityMainBinding;
 import com.beloncode.bionico.ipa.IpaInstaller;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.bottomnavigation.BottomNavigationItemView;
 import com.google.android.material.navigation.NavigationBarView;
 import java.io.File;
 import java.io.IOException;
@@ -146,8 +146,8 @@ public class MainActivity extends AppCompatActivity {
             return true;
         });
 
-        final FloatingActionButton mainAddButton = findViewById(R.id.add_button);
-        mainAddButton.setOnClickListener(view -> selectIpaFile());
+        final BottomNavigationItemView mainAddButton = findViewById(R.id.add_button);
+        mainAddButton.setOnClickListener(item -> selectIpaFile());
 
         final Context mainContext = getApplicationContext();
         final RecyclerView.LayoutManager mainCtxListLayout = new LinearLayoutManager(mainContext);

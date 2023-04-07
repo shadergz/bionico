@@ -2,12 +2,6 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/home_button"
-        android:title="@string/home"
-        android:icon="@drawable/ic_baseline_home_24"
-        app:showAsAction="ifRoom">
-    </item>
-    <item
         android:id="@+id/search_button"
         android:title="@string/search"
         android:icon="@drawable/ic_baseline_search_24"
@@ -25,6 +19,11 @@
         android:icon="@drawable/ic_baseline_settings_24"
         app:showAsAction="ifRoom">
     </item>
-
+    <item
+        android:id="@+id/add_button"
+        android:title="@string/add"
+        android:icon="@drawable/ic_baseline_add_24"
+        app:showAsAction="ifRoom">
+    </item>
 
 </menu>
